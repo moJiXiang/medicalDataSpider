@@ -4,9 +4,11 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 import scrapy
+from itemadapter import ItemAdapter
 
 
 class MedicaldataspiderItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    title = scrapy.Field()
+    author = scrapy.Field()
+    content = scrapy.Field()
