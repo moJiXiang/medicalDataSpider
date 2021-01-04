@@ -4,13 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      div.message {
+        white-space: pre;
+      }
+    </style>
   </head>
   <body>
     <div id="page"></div>
+    <div class="message">
+    </div>
   </body>
   <script>
     var page = document.getElementById("page");
     var inner = document.createElement("a");
     page.appendChild(inner);
+
+     let message = 
+      '病例信息\n              \n                \n                  疾病：\n                  \n                    肾亏\n                  \n                \n                \n                  希望得到的帮助：\n                  \n                    \n                  \n                \n                \n                  内容\n                  \n                    病情描述（发病时间、主要症状、就诊医院等）：\n            \n            多梦，乏力，容易疲惫，有早泄情况，但性欲又旺盛，记忆力不大好\n            \n            曾经治疗情况和效果：\n            \n            上个月去医生看了 喝了几副中药，睡眠质量有点改善\n            \n            想得到怎样的帮助：\n            \n            主要想问 肾阴虚火亢 会导致早泄吗 ，中药能改善我的问题吗，好像我很多年这样了 本人最近再天津 想去东直门中医院看看'
+     
+        let div = document.querySelector('.message')
+        div.innerHTML = message;
   </script>
 </html>

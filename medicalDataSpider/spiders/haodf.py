@@ -7,9 +7,12 @@ class ArticleSpider(Spider):
     # 爬虫名称
     name = "articles"
     # 爬虫真实的爬取url
-    start_urls = [
-        'https://so.haodf.com/index/search?kw=%E8%AF%95%E7%AE%A1',
-    ]
+
+    def __init__(self, keyword="", **kwargs):
+        self.start_urls = [
+            f'https://so.haodf.com/index/search?kw={keyword}',
+        ]
+        super().__init__(**kwargs)
 
     def start_requests(self):
         for url in self.start_urls:
@@ -35,21 +38,33 @@ class ArticleSpider(Spider):
 
         detail_div = response.xpath(
             './/div[@class="pb20 article_detail"]/div').get()
-        content = ""
 
-        if detail_div:
-            content = response.xpath(
-                'string(.//div[@class="pb20 article_detail"]/div)').extract()[0].strip()
+        question_awnser_main = response.xpath(".//main[@id='app']")
+
+        if question_awnser_main:
+            item = MedicaldataspiderItem()
+            item["title"] = response.css("h1.header-title::text").get().strip()
+            item["author"] = response.css(
+                "div.card-info-text span.info-text-name::text").get().strip()
+            item["content"] = response.xpath(
+                'string(.//section[@class="diseaseinfo"])').extract()[0].strip()
+            yield item
         else:
-            content = response.xpath(
-                'string(.//div[@class="pb20 article_detail"])').extract()[0].strip()
+            content = ""
 
-        def extract_with_css(query):
-            return response.css(query).get(default="").strip()
+            if detail_div:
+                content = response.xpath(
+                    'string(.//div[@class="pb20 article_detail"]/div)').extract()[0].strip()
+            else:
+                content = response.xpath(
+                    'string(.//div[@class="pb20 article_detail"])').extract()[0].strip()
 
-        item = MedicaldataspiderItem()
-        item["title"] = extract_with_css("div.article_l h1.fn + p::text")
-        item["author"] = extract_with_css('a.article_writer::text')
-        item["content"] = content
+            def extract_with_css(query):
+                return response.css(query).get(default="").strip()
 
-        yield item
+            item = MedicaldataspiderItem()
+            item["title"] = extract_with_css("div.article_l h1.fn + p::text")
+            item["author"] = extract_with_css('a.article_writer::text')
+            item["content"] = content
+
+            yield item
