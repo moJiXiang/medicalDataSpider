@@ -32,6 +32,5 @@ class MedicaldataspiderPipeline:
         self.client.close()
 
     def process_item(self, item, spider):
-        print("item: ", item)
         self.db[self.collection_name].insert_one(ItemAdapter(item).asdict())
         return item

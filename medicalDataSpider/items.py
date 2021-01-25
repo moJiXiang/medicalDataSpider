@@ -12,3 +12,7 @@ class MedicaldataspiderItem(scrapy.Item):
     title = scrapy.Field()
     author = scrapy.Field()
     content = scrapy.Field()
+
+
+class MedicaldataspiderKeywordItem(scrapy.Item):
+    keyword = scrapy.Field()

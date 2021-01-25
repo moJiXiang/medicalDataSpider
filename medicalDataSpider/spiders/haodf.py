@@ -1,6 +1,6 @@
 from scrapy.spiders import Spider
 from scrapy_splash import SplashRequest
-from medicalDataSpider.items import MedicaldataspiderItem
+from medicalDataSpider.items import MedicaldataspiderItem, MedicaldataspiderKeywordItem
 
 
 class ArticleSpider(Spider):
@@ -12,6 +12,7 @@ class ArticleSpider(Spider):
         self.start_urls = [
             f'https://so.haodf.com/index/search?kw={keyword}',
         ]
+
         super().__init__(**kwargs)
 
     def start_requests(self):
