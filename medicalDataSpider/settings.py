@@ -106,8 +106,10 @@ SPIDER_MIDDLEWARES = {
 
 # 下载器中间件
 DOWNLOADER_MIDDLEWARES = {
+    # 'medicalDataSpider.middlewares.ProxyMiddleware': 100,
     'scrapy_splash.SplashCookiesMiddleware': 723,
     'scrapy_splash.SplashMiddleware': 725,
+    'medicalDataSpider.middlewares.MedicaldataspiderDownloaderMiddleware': 726,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
 }
 

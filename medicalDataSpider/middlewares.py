@@ -4,9 +4,24 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+from fake_useragent import UserAgent
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+import random
+
+
+class ProxyMiddleware(object):
+    # 声明一个数组
+    proxyList = ['http://220.181.111.37:80', 'http://61.135.169.121:80']
+
+    # Downloader Middleware的核心方法，只有实现了其中一个或多个方法才算自定义了一个Downloader Middleware
+    def process_request(self, request, spider):
+        # 随机从其中选择一个，并去除左右两边空格
+        proxy = random.choice(self.proxyList).strip()
+        # 打印结果出来观察
+        print("this is request ip:" + proxy)
+        # 设置request的proxy属性的内容为代理ip
+        request.meta['proxy'] = proxy
 
 
 class MedicaldataspiderSpiderMiddleware:
@@ -78,6 +93,8 @@ class MedicaldataspiderDownloaderMiddleware:
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
+        ua = UserAgent()
+        request.headers['User-Agent'] = ua.random
         return None
 
     def process_response(self, request, response, spider):
