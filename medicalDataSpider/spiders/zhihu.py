@@ -5,7 +5,7 @@ import scrapy
 import asyncio
 from scrapy.spiders import Spider
 from scrapy_splash import SplashRequest, request
-from medicalDataSpider.items import ArticleItem, HuatiContentItem, HuatiItem,  WendaAskItem, WendaReplayItem
+from medicalDataSpider.items import ArticleItem, CommentItem, HuatiContentItem, HuatiItem,  WendaAskItem, WendaReplayItem
 
 lua_script = '''
 function main(splash, args)
@@ -50,6 +50,10 @@ article_lua_script = '''
 function main(splash, args)
     splash:go(splash.args.url)
     splash:wait(2)
+    btn = splash:select('.Modal-closeButton')
+    if(btn ~= nil) then
+        btn:mouse_click()
+    end
     return splash:html()
 end
 '''
@@ -69,23 +73,26 @@ class ZhihuSpider(Spider):
         self.start_urls = [
             f'https://www.zhihu.com/search?q={keyword}&type=topic',
         ]
-
+        self.article_url = f'https://zhuanlan.zhihu.com/p/357884274'
         super().__init__(**kwargs)
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield SplashRequest(url, self.parse, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600})
+        # for url in self.start_urls:
+        #     yield SplashRequest(url, self.parse, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600})
+
+        yield SplashRequest(self.article_url, self.parse_article_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3000})
 
     # 话题搜索结果页面
     def parse(self, response):
         arr = []
 
         items = response.xpath(
-            "//div[@class='List']//div[@class='List-item']")
+            "//div[@class='List-item']")
 
         for item in items:
             dict = {"url": "", "title": ""}
-            dict["url"] = item.xpath(".//@href").extract()[0]
+            dict["url"] = item.xpath(
+                ".//h2[@class='ContentItem-title']//a[@class='TopicLink']/@href").extract()[0]
             title = item.xpath(
                 "string(.//h2[@class='ContentItem-title']//a[@class='TopicLink']//span[@class='Highlight'])").extract()[0]
             dict["title"] = title
@@ -100,7 +107,7 @@ class ZhihuSpider(Spider):
 
         for idx, url in enumerate(urls):
             # yield SplashRequest(response.urljoin(url + '/hot'), self.parse_topic, endpoint="execute", args={'lua_source': topic_lua_script, 'timeout': 3600}, meta={'origin_url': url})
-            yield SplashRequest(response.urljoin(url), self.parse_topic_list, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'origin_url': url})
+            yield SplashRequest(response.urljoin(url), self.parse_topic_list, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'origin_url': response.urljoin(url)})
 
     def parse_topic(self, response):
         originUrl = response.meta["origin_url"]
@@ -173,11 +180,13 @@ class ZhihuSpider(Spider):
 
             huatiContent["visits"] = 0
 
-            if url.find("question") >= 0:
-                questionurl, _ = url.split("/answer")
-                yield SplashRequest(response.urljoin(questionurl), self.parse_question_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'topic_url': originUrl, "origin_url": response.urljoin(questionurl), "huatiContent": huatiContent})
-            else:
-                yield SplashRequest(response.urljoin('url'), self.parse_article_page, args={'lua_source': article_lua_script, 'timeout': 3600}, meta={'topic_url': originUrl, "origin_url": response.urljoin(url), "huatiContent": huatiContent})
+            # if url.find("question") >= 0:
+            #     questionurl, _ = url.split("/answer")
+            #     # yield SplashRequest(response.urljoin(questionurl), self.parse_question_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'topic_url': originUrl, "origin_url": response.urljoin(questionurl), "huatiContent": huatiContent})
+            # else:
+
+            if url.find("question") < 0:
+                yield SplashRequest(response.urljoin(url), self.parse_article_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'topic_url': originUrl, "origin_url": response.urljoin(url), "huatiContent": huatiContent})
 
     def parse_question_page(self, response):
         huatiContent = response.meta["huatiContent"]
@@ -211,11 +220,12 @@ class ZhihuSpider(Spider):
             replyItem = WendaReplayItem()
             replyItem["title"] = wenda["title"]
 
-            username = reply.xpath(
-                ".//div[@class='AuthorInfo-content']//span//text()").extract()[0]
+            common_username = reply.xpath(
+                ".//div[@class='AuthorInfo-content']//a[@class='UserLink-link']")
 
-            if username == "匿名用户":
-                replyItem["username"] = "匿名用户"
+            if common_username:
+                replyItem["username"] = reply.xpath(
+                    ".//div[@class='AuthorInfo-content']//span//text()").extract()[0]
             else:
                 replyItem["username"] = reply.xpath(
                     ".//div[@class='AuthorInfo-content']//a[@class='UserLink-link']//text()").extract()[0]
@@ -246,8 +256,8 @@ class ZhihuSpider(Spider):
         yield huatiContent
 
     def parse_article_page(self, response):
-        huatiContent = response.meta["huatiContent"]
-        post = response.xpath("// article[@class='Post-Main Post-NormalMain']")
+        # huatiContent = response.meta["huatiContent"]
+        post = response.xpath("//article[@class='Post-Main Post-NormalMain']")
         if (len(post) == 0):
             return None
 
@@ -264,22 +274,49 @@ class ZhihuSpider(Spider):
             text.append(p.xpath("string()").extract()[0].strip())
 
         article["content"] = "<br>".join(text)
-        article["imageList"] = []
+        article["images"] = []
 
         images = response.xpath(
             "//div[@class='Post-RichTextContainer']//img")
         for img in images:
             img_url = img.xpath("./@src").extract()[0]
             if img_url.find("http") == 0:
-                article["imageList"].append(img_url)
+                article["images"].append(img_url)
 
         article["visits"] = 0
         likesText = response.xpath(
             "//div[@class='ContentItem-actions']/span/button[contains(@class, 'VoteButton--up')]/text()").extract()[0].strip()
         article["likes"] = likesText.split("赞同")[1]
-        article["source"] = response.meta["origin_url"]
-        article["topicUrl"] = response.meta["topic_url"]
+        # article["source"] = response.meta["origin_url"]
+        # article["topicUrl"] = response.meta["topic_url"]
+        article["source"] = ""
+        article["topicUrl"] = ""
 
-        huatiContent["content"] = article
+        comments = response.xpath("//div[@class='CommentItemV2']")
 
-        yield huatiContent
+        print("comments: ", comments)
+
+        if (len(comments) > 0):
+            comItem = CommentItem()
+            # comment["source"] = response.meta["origin_url"]
+            comItem["source"] = ""
+            comItem["title"] = article["title"]
+            comItem["commentList"] = []
+
+            for comment in comments:
+                _item = {}
+                _item["username"] = comment.xpath(
+                    ".//span[@class='UserLink']/a/text()").extract()[0]
+                _item["content"] = comment.xpath(
+                    "string(.//div[@class='CommentItemV2-metaSibling'])").extract()[0]
+                _item["headPortrait"] = comment.xpath(
+                    ".//span[@class='UserLink CommentItemV2-avatar']//img/@src").extract()[0]
+
+                comItem["commentList"].append(_item)
+
+            yield comItem
+
+        # huatiContent["content"] = article
+
+        # yield huatiContent
+        yield article

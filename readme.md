@@ -1,4 +1,4 @@
-1. docker run -p 8050:8050 --memory=4.5G --restart=always scrapinghub/splash --max-timeout 3600 --maxrss 4000
+1. docker run -p 8050:8050 --memory=4.5G  --restart=always scrapinghub/splash --disable-private-mode --max-timeout 3600 --maxrss 4000
 2. scrapy crawl haodaifu_spider -a keyword=xxx
 
 ### 执行
@@ -18,3 +18,9 @@ https://ip.jiangxianli.com/?page=1
 https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
 
 https://free-proxy-list.net/
+
+
+### 问题
+1. 百度百科抓不到 赞数据
+
+https://stackoverflow.com/questions/51483008/scrapy-splash-not-rendering-dynamic-content-from-a-certain-react-driven-site

@@ -38,13 +38,13 @@ class HaodaifuSpider(Spider):
         zhuanjiaguandian_urls = []
         kanbing_urls = []
         for url in article_urls:
-            if url.find("zhuanjiaguandian") >= 0:
+            if url.find("zhuanjiaguandian") >= 0 and url.find("video") < 0 and url.find("voice") < 0:
                 zhuanjiaguandian_urls.append(url)
             elif url.find("kanbing") >= 0:
                 kanbing_urls.append(url)
 
         yield from response.follow_all(zhuanjiaguandian_urls, self.parse_article)
-        yield from response.follow_all(kanbing_urls, self.parse_wenda)
+        # yield from response.follow_all(kanbing_urls, self.parse_wenda)
 
     def parse_wenda(self, response):
         item = WendaAskItem()
@@ -64,7 +64,7 @@ class HaodaifuSpider(Spider):
     def parse_article(self, response):
 
         item = ArticleItem()
-        item["imageList"] = []
+        item["images"] = []
 
         detail_div = response.xpath(
             './/div[@class="pb20 article_detail"]/div').get()
@@ -105,9 +105,12 @@ class HaodaifuSpider(Spider):
         item["author"] = extract_with_css('a.article_writer::text')
         item["content"] = content
         item["source"] = response.request.url
+        item["visits"] = extract_with_css("font.orange1::text")
+        item["likes"] = 0
+        item["topicUrl"] = ""
 
         for img in images:
             img_url = img.xpath('./@src').extract()[0] or ''
-            item["imageList"].append(img_url)
+            item["images"].append(img_url)
 
         yield item

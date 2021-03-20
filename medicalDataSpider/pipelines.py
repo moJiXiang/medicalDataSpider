@@ -5,7 +5,8 @@
 
 
 # useful for handling different item types with a single interface
-from medicalDataSpider.items import ArticleItem, HuatiContentItem, HuatiItem, KeywordItem, WendaAskItem
+from re import S
+from medicalDataSpider.items import ArticleItem, BaikeItem, CommentItem, HuatiContentItem, HuatiItem, KeywordItem, WendaAskItem
 import pymongo
 import requests
 from itemadapter import ItemAdapter
@@ -20,6 +21,8 @@ class MedicaldataspiderPipeline:
     keyword_collection = "keyword"
     huati_collection = "huati"
     huaticontent_collection = "huati_content"
+    baike_collection = "baike"
+    comment_collection = "comment"
 
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
@@ -51,24 +54,49 @@ class MedicaldataspiderPipeline:
 
             self.db[self.keyword_collection].insert_one(
                 ItemAdapter(item).asdict())
+        elif isinstance(item, BaikeItem):
+            self.db[self.baike_collection].insert_one(
+                ItemAdapter(item).asdict())
+
+            api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setBaike"
+
+            requests.post(api, json={
+                "title": item["title"],
+                "description": item["description"],
+                "content": item["content"],
+                "likes": item["likes"],
+                "visits": item["visits"],
+                "images": item["images"],
+                "keyword": item["keyword"]
+            })
+
         elif isinstance(item, ArticleItem):
             self.db[self.article_collection].insert_one(
                 ItemAdapter(item).asdict())
 
-            api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/spiderArticle"
+            api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setNews"
 
             requests.post(api, json={
-                "article": {
-                    "title": item["title"],
-                    "content": item["content"],
-                    "keyword": item["keyword"],
-                    "description": "",
-                    "imageList": item["imageList"],
-                    "source": item["source"],
-                    "visits": item["visits"],
-                    "likes": item["likes"],
-                    "topicUrl": item["topicUrl"]
-                }
+                "title": item["title"],
+                "content": item["content"],
+                "keyword": item["keyword"],
+                "description": "",
+                "images": item["images"],
+                "source": item["source"],
+                "visits": item["visits"],
+                "likes": item["likes"],
+                "topicUrl": item["topicUrl"]
+            })
+
+        elif isinstance(item, CommentItem):
+            self.db[self.comment_collection].insert_one(
+                ItemAdapter(item).asdict())
+            api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setComment"
+
+            requests.post(api, json={
+                "title": item["title"],
+                "commentList": item["commentList"],
+                "source": item["source"]
             })
 
         elif isinstance(item, WendaAskItem):

@@ -20,7 +20,7 @@ class ArticleItem(scrapy.Item):
     author = scrapy.Field()
     content = scrapy.Field()
     source = scrapy.Field()
-    imageList = scrapy.Field()
+    images = scrapy.Field()
     visits = scrapy.Field()
     likes = scrapy.Field()
     topicUrl = scrapy.Field()
@@ -77,3 +77,20 @@ class HuatiContentItem(scrapy.Item):
     comments = scrapy.Field()
     visits = scrapy.Field()
     topicUrl = scrapy.Field()
+
+
+class BaikeItem(scrapy.Item):
+    keyword = scrapy.Field()
+    title = scrapy.Field()
+    description = scrapy.Field()
+    content = scrapy.Field()
+    likes = scrapy.Field()
+    images = scrapy.Field()
+    visits = scrapy.Field()
+    source = scrapy.Field()
+
+
+class CommentItem(scrapy.Item):
+    title = scrapy.Field()
+    source = scrapy.Field()
+    commentList = scrapy.Field()
