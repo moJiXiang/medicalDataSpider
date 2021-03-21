@@ -28,15 +28,16 @@ class Tm51Spider(Spider):
     def parse_hotkeyword(self, response):
         # keywords = response.xpath(
         #     "//div[@class=baikeLabel]//div[@class='L-maquee']/a/label/span/text()").extract()
+        keywordItem = KeywordItem()
+        keywordItem["keywordList"] = []
         keywords = response.css("div.L-maquee a label span::text").getall()
         for keyword in keywords:
             keyword = keyword.strip()
-            item = KeywordItem()
-            item["title"] = keyword
-            item["keywordList"] = []
-            item["keywordList"].append(keyword)
-            item["source"] = self.index_url
-            yield item
+            keywordItem["title"] = keyword
+            keywordItem["keywordList"].append(keyword)
+            keywordItem["source"] = self.index_url
+
+        yield keywordItem
 
     def parse(self, response):
         current_page = response.css(

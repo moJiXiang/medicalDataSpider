@@ -126,11 +126,12 @@ class BozhongSpider(Spider):
         tag_box = response.xpath(
             "//div[@class='mod_s tag_box']/div[@class='mod_con']/a/text()")
 
+        keywordItem = KeywordItem()
+        keywordItem["keywordList"] = []
         for keyword in tag_box:
             keyword = keyword.strip()
-            item = KeywordItem()
-            item["title"] = keyword
-            item["keywordList"] = []
-            item["keywordList"].append(keyword)
-            item["source"] = self.index_url
-            yield item
+            keywordItem["title"] = keyword
+            keywordItem["keywordList"].append(keyword)
+            keywordItem["source"] = f'https://www.icheruby.com/tags/'
+
+        yield keywordItem
