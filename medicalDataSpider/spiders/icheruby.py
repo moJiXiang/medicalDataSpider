@@ -43,7 +43,10 @@ class IcherubySpider(Spider):
         yield keywordItem
 
     def parse_topic(self, response):
-        root_url = f'https://www.icheruby.com'
+        viewport = response.xpath("//meta[@name='viewport']")
+
+        print("viewport: ", viewport)
+
         huatiItem = HuatiItem()
         huatiItem["tagName"] = response.meta["tagName"]
         huatiItem["keyword"] = response.meta["tagName"]
@@ -52,40 +55,65 @@ class IcherubySpider(Spider):
         huatiItem["content"] = response.xpath(
             "//div[@class='tag-description-container']/p/text()").extract()[0]
         huatiItem["images"] = response.xpath(
-            "//div[@class='fl tag-image']/img/@src").extract()
+            "//div[@class='tag-image']/img/@src").extract()
         huatiItem["source"] = response.meta["origin_url"]
         huatiItem["comments"] = 0
 
-        print('visits ', response.xpath(
-            "//div[@class='tag-information']/div[@class='tag-view']"))
-
         huatiItem["visits"] = response.xpath(
-            "//div[@class='tag-information']/div[@class='tag-view']/text()").extract()[0].split("被浏览 ")[1]
+            "//div[@class='tag-view-count']/span/text()").extract()[0]
         huatiItem["topicUrl"] = response.meta["origin_url"]
         huatiItem["parent_huati"] = ""
         huatiItem["sub_huati"] = []
 
         yield huatiItem
 
-        huati_list = response.xpath("//div[@class='content-container']/a")
+        huati_list = response.xpath(
+            "//div[@class='tag-items']/div[@class='tag-item']")
 
         for huati in huati_list:
             huatiContent = HuatiContentItem()
             huatiContent["keyword"] = response.meta["tagName"]
             huatiContent["tagName"] = response.meta["tagName"]
             huatiContent["title"] = huati.xpath(
-                ".//div[@class='item-title']/text()").extract()[0]
+                ".//div[@class='tag-item-title']/text()").extract()[0].strip()
             huatiContent["content"] = huati.xpath(
-                ".//div[@class='item-desc']/text()").extract()[0].strip()
+                ".//div[@class='tag-item-desc']/text()").extract()[0].strip()
             huatiContent["source"] = response.meta["origin_url"]
-            huatiContent["topicUrl"] = response.meta["topicUrl"]
-            huatiContent["visits"] = response.xpath(
-                ".//div[@class='count-number']/text()").extract()[0]
+            huatiContent["topicUrl"] = response.meta["origin_url"]
+            huatiContent["visits"] = 0
+            huatiContent["likes"] = 0
 
-            url = huati.xpath("./@href").extract()
+            url = huati.xpath(".//a/@href").extract()[0]
 
             if url.find("news") >= 0:
-                yield SplashRequest(response.urljoin(url), self.parse_news, endpoint="execute", args={'tagName': response.meta["tagName"], 'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": response.urljoin(url), "topic_url": response.request.url, "huatiContent": huatiContent})
+                yield SplashRequest(response.urljoin(url), self.parse_news, endpoint="execute", args={'tagName': response.meta["tagName"], 'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": response.urljoin(url), "tagName": response.meta["tagName"],  "topic_url": response.request.url, "huatiContent": huatiContent})
+
+        next_page = response.xpath(
+            "div[@class='page-container']/button[@class='page-button']/a")
+
+        if next_page:
+            next_page_url = next_page.xpath("./@href").extract()[0]
+            yield SplashRequest(next_page_url, self.parse_topic, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": next_page_url, "tagName": response.meta["tagName"]})
+
+        # huati_list = response.xpath("//div[@class='content-container']/a")
+
+        # for huati in huati_list:
+        #     huatiContent = HuatiContentItem()
+        #     huatiContent["keyword"] = response.meta["tagName"]
+        #     huatiContent["tagName"] = response.meta["tagName"]
+        #     huatiContent["title"] = huati.xpath(
+        #         ".//div[@class='item-title']/text()").extract()[0]
+        #     huatiContent["content"] = huati.xpath(
+        #         ".//div[@class='item-desc']/text()").extract()[0].strip()
+        #     huatiContent["source"] = response.meta["origin_url"]
+        #     huatiContent["topicUrl"] = response.meta["topicUrl"]
+        #     huatiContent["visits"] = response.xpath(
+        #         ".//div[@class='count-number']/text()").extract()[0]
+
+        #     url = huati.xpath("./@href").extract()
+
+        #     if url.find("news") >= 0:
+        #         yield SplashRequest(response.urljoin(url), self.parse_news, endpoint="execute", args={'tagName': response.meta["tagName"], 'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": response.urljoin(url), "topic_url": response.request.url, "huatiContent": huatiContent})
             # elif url.find("ask") >= 0:
             #     yield SplashRequest(response.urljoin(url), self.parse_ask, endpoint="execute", args={'tagName': response.meta["tagName"], 'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": response.urljoin(url), "topic_url": response.request.url,  "huatiContent": huatiContent})
 
@@ -95,10 +123,10 @@ class IcherubySpider(Spider):
         article = ArticleItem()
         article["keyword"] = response.meta["tagName"]
         article["title"] = response.xpath(
-            "//div[@class='content-top-One']/text()").extract()[0]
+            "//div[@class='title']/text()").extract()[0]
         article["author"] = ""
 
-        ptags = response.xpath("//div[@class='Article-content']//p")
+        ptags = response.xpath("//div[@class='content']//p")
 
         _text = []
         for p in ptags:
@@ -106,9 +134,9 @@ class IcherubySpider(Spider):
             t.replace("\n", "<br>")
             _text.append(t)
 
-        article["content"] = "<br>".append(_text)
+        article["content"] = "<br>".join(_text)
 
-        img_tags = response.xpath("//div[@class='Article-content']//img")
+        img_tags = response.xpath("//div[@class='content']//img")
 
         _images = []
 
@@ -118,11 +146,10 @@ class IcherubySpider(Spider):
         article["images"] = _images
         article["commentList"] = []
         article["visits"] = response.xpath(
-            "//div[@class='fl-top-one']//span[@class='follow']/em/text()").extract()[0]
+            "//div[@class='gnxx']//div[@class='onclick']/text()").extract()[0].split("已阅读")[0]
         article["likes"] = 0
         article["source"] = response.meta["origin_url"]
         article["topicUrl"] = response.meta["topic_url"]
-        article["comments"] = []
 
         huatiContent["content"] = article
 
