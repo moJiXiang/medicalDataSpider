@@ -85,7 +85,8 @@ class MedicaldataspiderPipeline:
                 "source": item["source"],
                 "visits": item["visits"],
                 "likes": item["likes"],
-                "topicUrl": item["topicUrl"]
+                "topicUrl": item["topicUrl"],
+                "commentList": item["commentList"]
             })
 
         elif isinstance(item, CommentItem):

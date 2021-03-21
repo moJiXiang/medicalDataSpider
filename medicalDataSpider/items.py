@@ -14,7 +14,6 @@ class KeywordItem(scrapy.Item):
 
 
 class ArticleItem(scrapy.Item):
-    # define the fields for your item here like:
     keyword = scrapy.Field()
     title = scrapy.Field()
     author = scrapy.Field()
@@ -24,6 +23,7 @@ class ArticleItem(scrapy.Item):
     visits = scrapy.Field()
     likes = scrapy.Field()
     topicUrl = scrapy.Field()
+    commentList = scrapy.Field()
 
 
 class WendaAskItem(scrapy.Item):

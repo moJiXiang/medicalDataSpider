@@ -24,3 +24,7 @@ https://free-proxy-list.net/
 1. 百度百科抓不到 赞数据
 
 https://stackoverflow.com/questions/51483008/scrapy-splash-not-rendering-dynamic-content-from-a-certain-react-driven-site
+
+
+2. Splash with dynamic page
+https://stackoverflow.com/questions/51483008/scrapy-splash-not-rendering-dynamic-content-from-a-certain-react-driven-site

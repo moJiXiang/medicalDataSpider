@@ -28,6 +28,39 @@ function main(splash, args)
         scroll_to(0, get_body_height())
         splash:wait(scroll_delay)
     end
+    return splash:html()
+end
+'''
+
+question_lua_script = '''
+function main(splash, args)
+    splash.images_enabled = false
+    local num_scrolls = 10  -- 翻页数
+    local scroll_delay = 1  -- 翻页等待时间
+    local scroll_to = splash:jsfunc("window.scrollTo")
+    local get_body_height = splash:jsfunc(
+        "function() {return document.body.scrollHeight;}"
+    )
+    assert(splash:go(splash.args.url))
+    assert(splash:wait(2))
+
+    btn = splash:select('.Modal-closeButton')
+    if(btn ~= nil) then
+        btn:mouse_click()
+    end
+
+    for _ = 1, num_scrolls do
+        scroll_to(0, get_body_height())
+        splash:wait(scroll_delay)
+    end
+
+    comment_btns = splash:select_all('.ContentItem-actions button:nth-child(1)')
+
+  
+  	for k, btn in pairs(comment_btns) do
+  		btn:mouse_click()
+  	end
+
   	splash:set_viewport_full()
     return splash:html()
 end
@@ -73,16 +106,31 @@ class ZhihuSpider(Spider):
         self.start_urls = [
             f'https://www.zhihu.com/search?q={keyword}&type=topic',
         ]
-        self.article_url = f'https://zhuanlan.zhihu.com/p/357884274'
+        self.article_url = [
+            f'https://zhuanlan.zhihu.com/p/357884274',
+            f'https://zhuanlan.zhihu.com/p/27760235',
+            f"https://zhuanlan.zhihu.com/p/29741465"
+        ]
         super().__init__(**kwargs)
 
     def start_requests(self):
         # for url in self.start_urls:
         #     yield SplashRequest(url, self.parse, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600})
 
-        yield SplashRequest(self.article_url, self.parse_article_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3000})
+        huatiContent = HuatiContentItem()
+        huatiContent["keyword"] = self.keyword
+        huatiContent["title"] = ""
+        huatiContent["description"] = ""
+        huatiContent["tagName"] = ""
+        huatiContent["source"] = ""
+        huatiContent["likes"] = ""
+        huatiContent["topicUrl"] = ""
+
+        for url in self.article_url:
+            yield SplashRequest(url, self.parse_article_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={"huatiContent": huatiContent, "origin_url": url, "topic_url": ""})
 
     # 话题搜索结果页面
+
     def parse(self, response):
         arr = []
 
@@ -106,7 +154,7 @@ class ZhihuSpider(Spider):
                 urls.append(_a["url"])
 
         for idx, url in enumerate(urls):
-            # yield SplashRequest(response.urljoin(url + '/hot'), self.parse_topic, endpoint="execute", args={'lua_source': topic_lua_script, 'timeout': 3600}, meta={'origin_url': url})
+            yield SplashRequest(response.urljoin(url + '/hot'), self.parse_topic, endpoint="execute", args={'lua_source': topic_lua_script, 'timeout': 3600}, meta={'origin_url': url})
             yield SplashRequest(response.urljoin(url), self.parse_topic_list, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'origin_url': response.urljoin(url)})
 
     def parse_topic(self, response):
@@ -180,12 +228,10 @@ class ZhihuSpider(Spider):
 
             huatiContent["visits"] = 0
 
-            # if url.find("question") >= 0:
-            #     questionurl, _ = url.split("/answer")
-            #     # yield SplashRequest(response.urljoin(questionurl), self.parse_question_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'topic_url': originUrl, "origin_url": response.urljoin(questionurl), "huatiContent": huatiContent})
-            # else:
-
-            if url.find("question") < 0:
+            if url.find("question") >= 0:
+                questionurl, _ = url.split("/answer")
+                yield SplashRequest(response.urljoin(questionurl), self.parse_question_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'topic_url': originUrl, "origin_url": response.urljoin(questionurl), "huatiContent": huatiContent})
+            else:
                 yield SplashRequest(response.urljoin(url), self.parse_article_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'topic_url': originUrl, "origin_url": response.urljoin(url), "huatiContent": huatiContent})
 
     def parse_question_page(self, response):
@@ -227,8 +273,15 @@ class ZhihuSpider(Spider):
                 replyItem["username"] = reply.xpath(
                     ".//div[@class='AuthorInfo-content']//span//text()").extract()[0]
             else:
-                replyItem["username"] = reply.xpath(
-                    ".//div[@class='AuthorInfo-content']//a[@class='UserLink-link']//text()").extract()[0]
+                userLink = reply.xpath(
+                    ".//div[@class='AuthorInfo-content']//a[@class='UserLink-link']")
+
+                if userLink:
+                    replyItem["username"] = reply.xpath(
+                        ".//div[@class='AuthorInfo-content']//a[@class='UserLink-link']//text()").extract()[0]
+                else:
+                    replyItem["username"] = reply.xpath(
+                        ".//div[@class='AuthorInfo-contet']//span//text()").extract()[0]
 
             replyItem["images"] = []
 
@@ -256,7 +309,8 @@ class ZhihuSpider(Spider):
         yield huatiContent
 
     def parse_article_page(self, response):
-        # huatiContent = response.meta["huatiContent"]
+        huatiContent = response.meta["huatiContent"]
+
         post = response.xpath("//article[@class='Post-Main Post-NormalMain']")
         if (len(post) == 0):
             return None
@@ -275,6 +329,7 @@ class ZhihuSpider(Spider):
 
         article["content"] = "<br>".join(text)
         article["images"] = []
+        article["commentList"] = []
 
         images = response.xpath(
             "//div[@class='Post-RichTextContainer']//img")
@@ -287,36 +342,28 @@ class ZhihuSpider(Spider):
         likesText = response.xpath(
             "//div[@class='ContentItem-actions']/span/button[contains(@class, 'VoteButton--up')]/text()").extract()[0].strip()
         article["likes"] = likesText.split("赞同")[1]
-        # article["source"] = response.meta["origin_url"]
-        # article["topicUrl"] = response.meta["topic_url"]
-        article["source"] = ""
-        article["topicUrl"] = ""
+        article["source"] = response.meta["origin_url"]
+        article["topicUrl"] = response.meta["topic_url"]
 
         comments = response.xpath("//div[@class='CommentItemV2']")
 
-        print("comments: ", comments)
-
         if (len(comments) > 0):
-            comItem = CommentItem()
-            # comment["source"] = response.meta["origin_url"]
-            comItem["source"] = ""
-            comItem["title"] = article["title"]
-            comItem["commentList"] = []
-
             for comment in comments:
                 _item = {}
-                _item["username"] = comment.xpath(
-                    ".//span[@class='UserLink']/a/text()").extract()[0]
+                if comment.xpath(".//span[@class='UserLink']/a"):
+                    _item["username"] = comment.xpath(
+                        ".//span[@class='UserLink']/a/text()").extract()[0]
+                else:
+                    _item["username"] = "知乎用户"
                 _item["content"] = comment.xpath(
                     "string(.//div[@class='CommentItemV2-metaSibling'])").extract()[0]
                 _item["headPortrait"] = comment.xpath(
                     ".//span[@class='UserLink CommentItemV2-avatar']//img/@src").extract()[0]
 
-                comItem["commentList"].append(_item)
-
-            yield comItem
+                article["commentList"].append(_item)
 
         # huatiContent["content"] = article
+        yield article
+        print("huati content----------->")
 
         # yield huatiContent
-        yield article
