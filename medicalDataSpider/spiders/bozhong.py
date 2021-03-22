@@ -30,7 +30,7 @@ class BozhongSpider(Spider):
 
     def __init__(self, keyword="", **kwargs):
         self.keyword = keyword
-        self.index_url = f'https://www.bozhong.com/search?s=11&q={keyword}',
+        self.index_url = f'https://www.bozhong.com/search?s=11&q={keyword}'
 
         super().__init__(**kwargs)
 
@@ -124,7 +124,7 @@ class BozhongSpider(Spider):
         yield item
 
         tag_box = response.xpath(
-            "//div[@class='mod_s tag_box']/div[@class='mod_con']/a/text()")
+            "//div[@class='mod_s tag_box']/div[@class='mod_con']/a/text()").extract()
 
         keywordItem = KeywordItem()
         keywordItem["keywordList"] = []
