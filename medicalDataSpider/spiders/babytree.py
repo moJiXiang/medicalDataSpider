@@ -1,6 +1,4 @@
 
-
-import re
 from scrapy.spiders import Spider
 from scrapy_splash import SplashRequest
 from medicalDataSpider.items import ArticleItem, KeywordItem, WendaAskItem, WendaReplayItem
@@ -14,14 +12,14 @@ end
 '''
 
 
-class ShiguanZhijiaSpider(Spider):
+class BabytreeSpider(Spider):
     # 爬虫名称
-    name = "shiguanzhijia_spider"
+    name = "babytree_spider"
     keyword = ""
 
     def __init__(self, keyword="", **kwargs):
         self.keyword = keyword
-        self.index_url = f'http://www.shiguanzhijia.cn/search.php?mod=portal&searchid=3015562&searchsubmit=yes&kw={keyword}'
+        self.index_url = f'http://www.babytree.com/s.php?q={keyword}&c=ask&cid=0'
 
         super().__init__(**kwargs)
 
