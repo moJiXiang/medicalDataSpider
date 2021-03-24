@@ -100,7 +100,10 @@ class HaodaifuSpider(Spider):
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
 
-        item["keyword"] = self.keyword
+        item["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        item["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         item["title"] = extract_with_css("div.article_l h1.fn + p::text")
         item["author"] = extract_with_css('a.article_writer::text')
         item["content"] = content

@@ -50,10 +50,12 @@ class So39Spider(Spider):
 
     def parse_wenda_page(self, response):
         item = WendaAskItem()
-        item["keyword"] = self.keyword
+        item["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        item["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         item["title"] = response.css(
             "div.ask_cont p.ask_tit::text").get().strip()
-        item["description"] = ""
         item["images"] = []
         item["content"] = response.css(
             "div.ask_cont div.ask_hid p.txt_ms::text").get().strip()
@@ -94,8 +96,10 @@ class So39Spider(Spider):
 
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
-
-        item["keyword"] = self.keyword
+        item["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        item["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         item["title"] = extract_with_css(
             "div.art_box h1::text")
         item["author"] = ""

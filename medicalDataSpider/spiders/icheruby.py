@@ -121,7 +121,10 @@ class IcherubySpider(Spider):
         huatiContent = response.meta["huatiContent"]
 
         article = ArticleItem()
-        article["keyword"] = response.meta["tagName"]
+        article["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        article["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         article["title"] = response.xpath(
             "//div[@class='title']/text()").extract()[0]
         article["author"] = ""

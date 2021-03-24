@@ -237,7 +237,10 @@ class ZhihuSpider(Spider):
     def parse_question_page(self, response):
         huatiContent = response.meta["huatiContent"]
         wenda = WendaAskItem()
-        wenda["keyword"] = self.keyword
+        wenda["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        wenda["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         wenda["title"] = response.xpath(
             "//div[@class='QuestionHeader']//h1[@class='QuestionHeader-title']/text()").extract()[0]
 
@@ -317,6 +320,10 @@ class ZhihuSpider(Spider):
 
         article = ArticleItem()
         article["keyword"] = self.keyword
+        article["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        article["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         article["title"] = response.xpath(
             "//article[@class='Post-Main Post-NormalMain']/header[@class='Post-Header']/h1/text()").extract()[0]
         article["author"] = response.xpath(

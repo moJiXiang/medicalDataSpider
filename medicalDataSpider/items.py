@@ -15,6 +15,7 @@ class KeywordItem(scrapy.Item):
 
 class ArticleItem(scrapy.Item):
     keyword = scrapy.Field()
+    description = scrapy.Field()
     title = scrapy.Field()
     author = scrapy.Field()
     content = scrapy.Field()

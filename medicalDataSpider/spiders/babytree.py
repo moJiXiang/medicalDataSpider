@@ -53,10 +53,12 @@ class BabytreeSpider(Spider):
 
     def parse_ask(self, response):
         wendaAskItem = WendaAskItem()
-        wendaAskItem["keyword"] = self.keyword
+        wendaAskItem["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        wendaAskItem["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         wendaAskItem["title"] = response.xpath(
             "//div[@class='qa-title']/h1/text()").extract()[0]
-        wendaAskItem["description"] = ""
         wendaAskItem["images"] = []
         wendaAskItem["content"] = response.xpath(
             "string(//blockquote[@class='qa-text'])").extract()[0].strip()

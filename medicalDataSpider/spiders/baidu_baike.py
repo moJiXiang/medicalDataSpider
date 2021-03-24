@@ -33,11 +33,12 @@ class BaiduBaikeSpider(Spider):
     def parse(self, response):
         item = BaikeItem()
         item["source"] = response.request.url
-        item["keyword"] = self.keyword
+        item["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        item["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         item["title"] = response.xpath(
             "//dd[@class='lemmaWgt-lemmaTitle-title']//h1//text()").extract()[0].strip()
-        item["description"] = response.xpath(
-            "string(//div[@class='lemma-summary'])").extract()[0].strip()
         paradivs = response.xpath(
             "//div[@class='main-content']/div[contains(@class, 'para-title') or contains(@class, 'para')]")
 

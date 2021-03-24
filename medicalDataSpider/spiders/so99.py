@@ -50,7 +50,10 @@ class So99Spider(Spider):
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
 
-        item["keyword"] = self.keyword
+        item["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        item["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         item["title"] = extract_with_css(
             "div.atcle-mid div.atcle-top  h1::text")
         item["author"] = ""
@@ -98,7 +101,10 @@ class So99Spider(Spider):
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
 
-        item["keyword"] = self.keyword
+        item["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        item["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         item["title"] = extract_with_css(
             "div.detail-box div.detail-top  h1::text")
         item["author"] = ""
@@ -132,9 +138,11 @@ class So99Spider(Spider):
     def parse_wenda_page(self, response):
         item = WendaAskItem()
 
-        item["keyword"] = self.keyword
+        item["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        item["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         item["title"] = response.css("div.dtl-top h1::text").get()
-        item["description"] = ""
         item["images"] = []
 
         ptags = response.xpath("//div[@class='atcle-ms']/p")

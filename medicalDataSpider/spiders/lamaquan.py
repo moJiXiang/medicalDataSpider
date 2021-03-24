@@ -46,6 +46,8 @@ class LamaquanSpider(Spider):
         article = ArticleItem()
         article["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
+        article["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         # article["keyword"] = response.xpath("//meta[@name='keywords']/@content").extract()[0]
         article["title"] = response.xpath(
             "//p[@class='a_title']/text()").extract()[0]

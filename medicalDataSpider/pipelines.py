@@ -61,6 +61,7 @@ class MedicaldataspiderPipeline:
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setBaike"
 
             requests.post(api, json={
+                "source": item["source"],
                 "title": item["title"],
                 "description": item["description"],
                 "content": item["content"],
@@ -80,7 +81,7 @@ class MedicaldataspiderPipeline:
                 "title": item["title"],
                 "content": item["content"],
                 "keyword": item["keyword"],
-                "description": "",
+                "description": item["description"],
                 "images": item["images"],
                 "source": item["source"],
                 "visits": item["visits"],

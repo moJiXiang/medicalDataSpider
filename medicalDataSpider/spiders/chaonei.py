@@ -59,10 +59,13 @@ class ChaoneiSpider(Spider):
         wendaAskItem = WendaAskItem()
 
         wendaAskItem["keyword"] = response.xpath(
-            "//div[contains(@class, 'intro-tags')]/a/text()").extract()[0]
+            "//meta[@name='keywords']/@content").extract()[0]
+        wendaAskItem["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
+
         wendaAskItem["title"] = response.xpath(
             "//h1[@class='audio-intro-h1']/text()").extract()[0]
-        wendaAskItem["description"] = ""
+
         wendaAskItem["images"] = []
         wendaAskItem["content"] = response.xpath(
             "//div[@class='areat-m']/div[contains(@class, 'audio-intro-main')][1]/p/text()").extract()[0].strip()
@@ -124,8 +127,11 @@ class ChaoneiSpider(Spider):
 
     def parse_news(self, response):
         article = ArticleItem()
+
         article["keyword"] = response.xpath(
-            "//div[contains(@class, 'intro-tags')]/a/text()").extract()[0]
+            "//meta[@name='keywords']/@content").extract()[0]
+        article["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         article["title"] = response.xpath(
             "//h1[@class='audio-intro-h1']/text()").extract()[0]
         article["author"] = response.xpath(

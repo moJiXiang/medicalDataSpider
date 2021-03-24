@@ -88,10 +88,12 @@ class BaiduZhidaoSpider(Spider):
     def parse_zhidao(self, response):
         print(response.xpath("//html"))
         ask = WendaAskItem()
-        ask["keyword"] = self.keyword
+        ask["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        ask["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         ask["title"] = response.xpath(
             "//article[@id='qb-content']//span[@class='ask-title']/text()").extract()[0]
-        ask["description"] = ""
         ask["images"] = []
 
         image_wrap = response.xpath(

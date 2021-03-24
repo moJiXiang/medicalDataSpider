@@ -48,11 +48,12 @@ class Ask120Spider(Spider):
 
     def parse_ask(self, response):
         wendaAskItem = WendaAskItem()
-        wendaAskItem["keyword"] = self.keyword
+        wendaAskItem["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        wendaAskItem["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         wendaAskItem["title"] = response.xpath(
             "//h1[@id='d_askH1']/text()").extract()[0]
-        wendaAskItem["description"] = response.xpath(
-            "//meta[@name='description']/@content").extract()[0].strip()
         wendaAskItem["images"] = []
         wendaAskItem["content"] = response.xpath(
             "string(//div[@class='b_askcont']/p[@class='crazy_new'])").extract()[0].strip()

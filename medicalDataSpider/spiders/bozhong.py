@@ -56,10 +56,13 @@ class BozhongSpider(Spider):
     def parse_wenda(self, response):
 
         item = WendaAskItem()
-        item["keyword"] = self.keyword
+
+        item["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        item["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         item["title"] = response.xpath(
             "//h1[@class='ts-title']/text()").extract()[0]
-        item["description"] = ""
         item["images"] = []
 
         content_table = response.xpath(
