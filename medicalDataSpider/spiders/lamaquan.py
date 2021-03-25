@@ -54,19 +54,31 @@ class LamaquanSpider(Spider):
         article["author"] = response.xpath(
             "//p[@class='box_p']/span[1]/text()").extract()[0]
 
-        ptags = response.xpath("//div[@class='yxli']/div/ul/ul/*[div | p]")
+        article_content = response.xpath(
+            "//div[@class='yxli']/td[@id='article_content']")
 
-        if (len(ptags) > 0):
-
+        if article_content:
+            divs = article_content.xpath(".//div")
             text = []
-            for p in ptags:
-                t = p.xpath("string()").extract()[0].strip()
-                if t != "":
-                    text.append(t)
+            for d in divs:
+                t = d.xpath("string()").extract()[0]
+                if (t != ""):
+                    text.append(d.xpath("string()").extract()[0])
             article["content"] = "<br>".join(text)
         else:
-            article["content"] = response.xpath(
-                "string(//div[@class='yxli']/div/ul/ul)").extract()[0]
+            ptags = response.xpath("//div[@class='yxli']/div/ul/ul/*[div | p]")
+
+            if (len(ptags) > 0):
+
+                text = []
+                for p in ptags:
+                    t = p.xpath("string()").extract()[0].strip()
+                    if t != "":
+                        text.append(t)
+                article["content"] = "<br>".join(text)
+            else:
+                article["content"] = response.xpath(
+                    "string(//div[@class='yxli']/div/ul/ul)").extract()[0]
 
         article["source"] = response.meta["origin_url"]
         article["images"] = []

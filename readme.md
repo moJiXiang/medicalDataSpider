@@ -23,3 +23,9 @@ https://stackoverflow.com/questions/51483008/scrapy-splash-not-rendering-dynamic
 ### 运行爬虫
 
 sh start_spider.sh sougou_spider 试管婴儿
+
+百度 搜狗不需要运行在 splash privite mode
+
+### 重爬
+sougou
+lamaquan
