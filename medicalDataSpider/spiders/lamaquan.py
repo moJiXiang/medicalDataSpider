@@ -55,25 +55,28 @@ class LamaquanSpider(Spider):
             "//p[@class='box_p']/span[1]/text()").extract()[0]
 
         article_content = response.xpath(
-            "//div[@class='yxli']/td[@id='article_content']")
+            "//div[@class='yxli']//td[@id='article_content']")
 
         if article_content:
-            divs = article_content.xpath(".//div")
+            divs = article_content.xpath(
+                "./div | ./p")
+            print("divs: ", divs)
             text = []
             for d in divs:
-                t = d.xpath("string()").extract()[0]
-                if (t != ""):
-                    text.append(d.xpath("string()").extract()[0])
+                t = d.xpath("string()").extract()[0].strip()
+                if (len(t) > 0):
+                    text.append(t)
             article["content"] = "<br>".join(text)
         else:
-            ptags = response.xpath("//div[@class='yxli']/div/ul/ul/*[div | p]")
+            ptags = response.xpath(
+                "//div[@class='yxli']/div/ul/ul/div | //div[@class='yxli']/div/ul/ul/p")
 
             if (len(ptags) > 0):
 
                 text = []
                 for p in ptags:
                     t = p.xpath("string()").extract()[0].strip()
-                    if t != "":
+                    if len(t) > 0:
                         text.append(t)
                 article["content"] = "<br>".join(text)
             else:

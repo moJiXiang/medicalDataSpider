@@ -84,8 +84,12 @@ class BozhongSpider(Spider):
         item["source"] = response.meta["origin_url"]
         item["username"] = response.xpath(
             "//div[@class='theme_box post_list']//div[@class='auth_info_bar']//a/text()").extract()[0]
-        item["headPortrait"] = response.xpath(
-            "//div[@class='theme_box post_list']/div[@class='auth_info']//div[@class='avatar']/img/@src").extract()[0]
+        if response.xpath(
+                "//div[@class='theme_box post_list']/div[@class='auth_info']//div[@class='avatar']/img"):
+            item["headPortrait"] = ""
+        else:
+            item["headPortrait"] = response.xpath(
+                "//div[@class='theme_box post_list']/div[@class='auth_info']//div[@class='avatar']/img/@src").extract()[0]
         item["askList"] = []
         item["topicUrl"] = ""
 

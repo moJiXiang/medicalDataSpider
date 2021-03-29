@@ -37,7 +37,7 @@ end
 
 class BaiduZhidaoSpider(Spider):
     # 爬虫名称
-    name = "baiduzhidao_spider"
+    name = "baidu_zhidao_spider"
     keyword = ""
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36",
@@ -88,10 +88,18 @@ class BaiduZhidaoSpider(Spider):
     def parse_zhidao(self, response):
         print(response.xpath("//html"))
         ask = WendaAskItem()
-        ask["keyword"] = response.xpath(
-            "//meta[@name='keywords']/@content").extract()[0]
-        ask["description"] = response.xpath(
-            "//meta[@name='description']/@content").extract()[0]
+        if response.xpath(
+                "//meta[@name='keywords']"):
+            ask["keyword"] = response.xpath(
+                "//meta[@name='keywords']/@content").extract()[0]
+        else:
+            ask["keyword"] = self.keyword
+
+        if response.xpath("//meta[@name='description']"):
+            ask["description"] = response.xpath(
+                "//meta[@name='description']/@content").extract()[0]
+        else:
+            ask["description"] = ""
         ask["title"] = response.xpath(
             "//article[@id='qb-content']//span[@class='ask-title']/text()").extract()[0]
         ask["images"] = []

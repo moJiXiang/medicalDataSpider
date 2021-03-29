@@ -33,8 +33,6 @@ class Ask120Spider(Spider):
         next_page = response.xpath(
             "//div[@class='p_pagediv']/a[last()]/@href").extract()[0]
 
-        print("next_page; ", next_page)
-
         if next_page:
             yield SplashRequest(response.urljoin(next_page), self.parse)
 
@@ -73,8 +71,6 @@ class Ask120Spider(Spider):
 
         reply_list = response.xpath(
             "//div[contains(@class, 'b_answerbox')]/div[@class='b_answerli']")
-
-        print("reply_list: ", reply_list)
 
         if reply_list:
             for reply in reply_list:

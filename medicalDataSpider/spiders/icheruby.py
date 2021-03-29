@@ -120,40 +120,72 @@ class IcherubySpider(Spider):
     def parse_news(self, response):
         huatiContent = response.meta["huatiContent"]
 
-        article = ArticleItem()
-        article["keyword"] = response.xpath(
-            "//meta[@name='keywords']/@content").extract()[0]
-        article["description"] = response.xpath(
-            "//meta[@name='description']/@content").extract()[0]
-        article["title"] = response.xpath(
-            "//div[@class='title']/text()").extract()[0]
-        article["author"] = ""
+        if response.xpath("//div[@class='content-top-One']"):
+            article = ArticleItem()
+            article["keyword"] = response.xpath(
+                "//meta[@name='keywords']/@content").extract()[0]
+            article["description"] = response.xpath(
+                "//meta[@name='description']/@content").extract()[0]
+            article["title"] = response.xpath(
+                "//div[@class='content-top-One']/text()").extract()[0]
+            article["author"] = "相因网"
 
-        ptags = response.xpath("//div[@class='content']//p")
+            ptags = response.xpath("//div[@class='Article-content']//p")
 
-        _text = []
-        for p in ptags:
-            t = p.xpath("string()").extract()[0].strip()
-            t.replace("\n", "<br>")
-            _text.append(t)
+            text = []
+            for p in ptags:
+                t = p.xpath("string()").extract()[0].strip()
+                if (len(t) > 0):
+                    text.append(t)
 
-        article["content"] = "<br>".join(_text)
+            article["content"] = "<br>".join(text)
 
-        img_tags = response.xpath("//div[@class='content']//img")
+            article["images"] = response.xpath(
+                "//div[@class='Article-content']//img/@src").extract()
+            article["commentList"] = []
+            article["visits"] = response.xpath(
+                "//span[@class='follow']//em/text()").extract()[0]
+            article["likes"] = 0
+            article["source"] = response.meta["origin_url"]
+            article["topicUrl"] = response.meta["topic_url"]
+            huatiContent["content"] = article
 
-        _images = []
+            yield huatiContent
+        else:
+            article = ArticleItem()
+            article["keyword"] = response.xpath(
+                "//meta[@name='keywords']/@content").extract()[0]
+            article["description"] = response.xpath(
+                "//meta[@name='description']/@content").extract()[0]
+            article["title"] = response.xpath(
+                "//div[@class='title']/text()").extract()[0]
+            article["author"] = ""
 
-        for img in img_tags:
-            _images.append(img.xpath("./@src").extract()[0])
+            ptags = response.xpath("//div[@class='content']//p")
 
-        article["images"] = _images
-        article["commentList"] = []
-        article["visits"] = response.xpath(
-            "//div[@class='gnxx']//div[@class='onclick']/text()").extract()[0].split("已阅读")[0]
-        article["likes"] = 0
-        article["source"] = response.meta["origin_url"]
-        article["topicUrl"] = response.meta["topic_url"]
+            _text = []
+            for p in ptags:
+                t = p.xpath("string()").extract()[0].strip()
+                t.replace("\n", "<br>")
+                _text.append(t)
 
-        huatiContent["content"] = article
+            article["content"] = "<br>".join(_text)
 
-        yield huatiContent
+            img_tags = response.xpath("//div[@class='content']//img")
+
+            _images = []
+
+            for img in img_tags:
+                _images.append(img.xpath("./@src").extract()[0])
+
+            article["images"] = _images
+            article["commentList"] = []
+            article["visits"] = response.xpath(
+                "//div[@class='gnxx']//div[@class='onclick']/text()").extract()[0].split("已阅读")[0]
+            article["likes"] = 0
+            article["source"] = response.meta["origin_url"]
+            article["topicUrl"] = response.meta["topic_url"]
+
+            huatiContent["content"] = article
+
+            yield huatiContent

@@ -29,3 +29,14 @@ sh start_spider.sh sougou_spider 试管婴儿
 ### 重爬
 sougou
 lamaquan
+ask120
+babytree
+baidu_baike
+baidu_zhidao
+bozhong
+chaonei
+fh21
+haodaifu
+icheruby
+jianshu
+[] shiguanzhijia

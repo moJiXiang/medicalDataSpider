@@ -58,8 +58,12 @@ class ChaoneiSpider(Spider):
     def parse_qa(self, response):
         wendaAskItem = WendaAskItem()
 
-        wendaAskItem["keyword"] = response.xpath(
-            "//meta[@name='keywords']/@content").extract()[0]
+        if response.xpath("//meta[@name='keywords']"):
+            wendaAskItem["keyword"] = response.xpath(
+                "//meta[@name='keywords']/@content").extract()[0]
+        else:
+            wendaAskItem["keyword"] = self.keyword
+
         wendaAskItem["description"] = response.xpath(
             "//meta[@name='description']/@content").extract()[0]
 
@@ -128,14 +132,23 @@ class ChaoneiSpider(Spider):
     def parse_news(self, response):
         article = ArticleItem()
 
-        article["keyword"] = response.xpath(
-            "//meta[@name='keywords']/@content").extract()[0]
+        if response.xpath(
+                "//meta[@name='keywords']"):
+            article["keyword"] = response.xpath(
+                "//meta[@name='keywords']/@content").extract()[0]
+        else:
+            article["keyword"] = self.keyword
         article["description"] = response.xpath(
             "//meta[@name='description']/@content").extract()[0]
         article["title"] = response.xpath(
             "//h1[@class='audio-intro-h1']/text()").extract()[0]
-        article["author"] = response.xpath(
-            "//div[@class='dr-li-item audio-intro-l']/a[@class='a']/span[@class='nm']/text()").extract()[0]
+        if response.xpath("//div[@class='dr-li-item audio-intro-l']/a[@class='a']"):
+            article["author"] = response.xpath(
+                "//div[@class='dr-li-item audio-intro-l']/a[@class='a']/span[@class='nm']/text()").extract()[0]
+        else:
+            article["author"] = response.xpath(
+                "//div[@class='dr-li-item audio-intro-l']/span[@class='a']/span[@class='nm']/text()").extract()[0]
+
         article["images"] = []
         article["visits"] = response.xpath(
             "//div[@class='intro-ts mt25']/span[contains(@class, 'shows')]/text()").extract()[0].split("阅读量：")[1]

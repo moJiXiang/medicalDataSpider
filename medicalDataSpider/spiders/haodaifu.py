@@ -102,8 +102,13 @@ class HaodaifuSpider(Spider):
 
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
-        item["description"] = response.xpath(
-            "//meta[@name='description']/@content").extract()[0]
+        if response.xpath("//meta[@name='Description']"):
+            item["description"] = response.xpath(
+                "//meta[@name='Description']/@content").extract()[0]
+        else:
+            item["description"] = response.xpath(
+                "//meta[@name='description']/@content").extract()[0]
+
         item["title"] = extract_with_css("div.article_l h1.fn + p::text")
         item["author"] = extract_with_css('a.article_writer::text')
         item["content"] = content
@@ -111,6 +116,7 @@ class HaodaifuSpider(Spider):
         item["visits"] = extract_with_css("font.orange1::text")
         item["likes"] = 0
         item["topicUrl"] = ""
+        item["commentList"] = []
 
         for img in images:
             img_url = img.xpath('./@src').extract()[0] or ''

@@ -68,7 +68,7 @@ class YunivfSpider(Spider):
         article["author"] = ""
 
         ptags = response.xpath(
-            "//div[contains(@class, 'detailinfo')]//*[p or span]")
+            "//div[contains(@class, 'detailinfo')]//p | //div[contains(@class, 'detailinfo')]//span")
 
         _text = []
         for p in ptags:

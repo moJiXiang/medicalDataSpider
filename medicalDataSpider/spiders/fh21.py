@@ -26,13 +26,14 @@ class Fh21Spider(Spider):
         current_page = response.css(
             "div.pageStyle p span.current::text").extract()[0]
 
-        print("当前页=========>", current_page)
-
         urls = response.css("div.repository a::attr(href)").getall()
 
-        print("urls====>", urls)
+        pc_urls = []
+        for url in urls:
+            if url.find("m.fh21") < 0:
+                pc_urls.append(url)
 
-        yield from response.follow_all(urls, self.parse_article)
+        yield from response.follow_all(pc_urls, self.parse_article)
 
         next_page = response.css(
             "div.pageStyle p span.current + a::attr(href)").get()
@@ -42,7 +43,7 @@ class Fh21Spider(Spider):
     def parse_article(self, response):
 
         item = ArticleItem()
-        item["imageList"] = []
+        item["images"] = []
 
         ptags = response.xpath(
             './/div[@class="main_content"]//div[@class="detail"]/ul[@class="detailc"]//p')
@@ -62,8 +63,17 @@ class Fh21Spider(Spider):
             "//meta[@name='description']/@content").extract()[0]
         item["title"] = extract_with_css(
             "div.detail > ul.detaila::text")
-        item["author"] = ""
         item["content"] = content
         item["source"] = response.request.url
+
+        info = response.xpath(
+            "//div[@class='detail']/ul[@class='detailb']/ul[1]/text()").extract()[0]
+        [_, author, visits] = info.split("\xa0\xa0\xa0\xa0")
+
+        item["author"] = author.split("来源：")[1]
+        item["visits"] = visits.split("浏览数：")[1]
+        item["likes"] = 0
+        item["topicUrl"] = ""
+        item["commentList"] = []
 
         yield item
