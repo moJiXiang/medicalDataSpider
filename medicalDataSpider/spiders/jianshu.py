@@ -77,6 +77,8 @@ class JianshuSpider(Spider):
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
 
+        item["tagName"] = self.keyword
+
         if response.xpath("//meta[@name='keywords']"):
             item["keyword"] = response.xpath(
                 "//meta[@name='keywords']/@content").extract()[0]

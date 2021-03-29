@@ -53,6 +53,7 @@ class BabytreeSpider(Spider):
 
     def parse_ask(self, response):
         wendaAskItem = WendaAskItem()
+        wendaAskItem["tagName"] = self.keyword
         wendaAskItem["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         wendaAskItem["description"] = response.xpath(
@@ -118,7 +119,6 @@ class BabytreeSpider(Spider):
                 wendaAskItem["askList"].append(wendaReply)
 
         pagejump = response.xpath("//div[@class='pagejump']")
-        print("pagejump: ", pagejump)
         if len(pagejump) > 0:
 
             pages = response.xpath("//div[@class='pagejump']/a")
@@ -126,16 +126,13 @@ class BabytreeSpider(Spider):
             for page in pages:
                 if page.xpath("./text()").extract()[0] == "下一页":
                     next_page_url = page.xpath("./@href").extract()[0]
-                    print("next_page_url: ", response.urljoin(next_page_url))
                     yield SplashRequest(response.urljoin(next_page_url), self.parse_next_ask, args={'wait': 1}, meta={'origin_url': response.urljoin(next_page_url), 'wendaAskItem': wendaAskItem})
         else:
             yield wendaAskItem
 
     def parse_next_ask(self, response):
-        print("parse next ask")
         wendaAskItem = response.meta["wendaAskItem"]
         reply_list = response.xpath("//ul[@class='qa-answer-list']")
-        print("reply_list: ", reply_list)
         if reply_list:
             replys = reply_list.xpath("./li[@class='answer-item']")
             for reply in replys:
@@ -164,10 +161,7 @@ class BabytreeSpider(Spider):
 
         result = re.search(r"\d+\.?\d*", total_page_text)
 
-        print("result: ", result.group())
-
         total_num = int(result.group())
 
-        print("current_page: ", current_page, total_num)
         if current_page == total_num:
             yield wendaAskItem

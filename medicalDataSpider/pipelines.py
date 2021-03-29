@@ -61,6 +61,7 @@ class MedicaldataspiderPipeline:
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setBaike"
 
             requests.post(api, json={
+                "tagName": item["tagName"],
                 "source": item["source"],
                 "title": item["title"],
                 "description": item["description"],
@@ -78,6 +79,7 @@ class MedicaldataspiderPipeline:
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setNews"
 
             requests.post(api, json={
+                "tagName": item["tagName"],
                 "title": item["title"],
                 "content": item["content"],
                 "keyword": item["keyword"],
@@ -113,6 +115,7 @@ class MedicaldataspiderPipeline:
                 askList.append(dict(reply))
 
             requests.post(api, json={
+                "tagName": item["tagName"],
                 "keyword": item["keyword"],
                 "title": item["title"],
                 "description": item["description"],
@@ -133,6 +136,7 @@ class MedicaldataspiderPipeline:
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setHuati"
 
             requests.post(api, json={
+                "tagName": item["tagName"],
                 "keyword": item["keyword"],
                 "tagName": item["tagName"],
                 "title": item["title"],
@@ -171,6 +175,7 @@ class MedicaldataspiderPipeline:
                 ask["askList"] = _askList
 
                 requests.post(api, json={
+                    "tagName": item["tagName"],
                     "keyword": item["keyword"],
                     "tagName": item["tagName"],
                     "title": item["title"],
@@ -181,6 +186,7 @@ class MedicaldataspiderPipeline:
                 })
             else:
                 requests.post(api, json={
+                    "tagName": item["tagName"],
                     "keyword": item["keyword"],
                     "tagName": item["tagName"],
                     "title": item["title"],

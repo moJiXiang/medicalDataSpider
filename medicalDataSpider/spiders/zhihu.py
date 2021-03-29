@@ -114,20 +114,20 @@ class ZhihuSpider(Spider):
         super().__init__(**kwargs)
 
     def start_requests(self):
-        # for url in self.start_urls:
-        #     yield SplashRequest(url, self.parse, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600})
+        for url in self.start_urls:
+            yield SplashRequest(url, self.parse, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600})
 
-        huatiContent = HuatiContentItem()
-        huatiContent["keyword"] = self.keyword
-        huatiContent["title"] = ""
-        huatiContent["description"] = ""
-        huatiContent["tagName"] = ""
-        huatiContent["source"] = ""
-        huatiContent["likes"] = ""
-        huatiContent["topicUrl"] = ""
+        # huatiContent = HuatiContentItem()
+        # huatiContent["keyword"] = self.keyword
+        # huatiContent["title"] = ""
+        # huatiContent["description"] = ""
+        # huatiContent["tagName"] = ""
+        # huatiContent["source"] = ""
+        # huatiContent["likes"] = ""
+        # huatiContent["topicUrl"] = ""
 
-        for url in self.article_url:
-            yield SplashRequest(url, self.parse_article_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={"huatiContent": huatiContent, "origin_url": url, "topic_url": ""})
+        # for url in self.article_url:
+        #     yield SplashRequest(url, self.parse_article_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={"huatiContent": huatiContent, "origin_url": url, "topic_url": ""})
 
     # 话题搜索结果页面
 
@@ -161,8 +161,11 @@ class ZhihuSpider(Spider):
         originUrl = response.meta["origin_url"]
 
         huati = HuatiItem()
-        huati["keyword"] = self.keyword
-        huati["tagName"] = ""
+        huati["tagName"] = self.keyword
+        huati["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
+        huati["description"] = response.xpath(
+            "//meta[@name='description']/@content").extract()[0]
         huati["topicUrl"] = originUrl
 
         topicCard = response.xpath("//div[@class='TopicCard']")
@@ -206,8 +209,9 @@ class ZhihuSpider(Spider):
                 ".//h2[@class='ContentItem-title']//a/@href").extract()[0]
 
             huatiContent = HuatiContentItem()
-            huatiContent["keyword"] = self.keyword
-            huatiContent["tagName"] = ""
+            huatiContent["tagName"] = self.keyword
+            huatiContent["keyword"] = response.xpath(
+                "//meta[@name='keywords']/@content").extract()[0]
             huatiContent["title"] = topic.xpath(
                 "string(.//h2[@class='ContentItem-title']//a)").extract()[0]
             huatiContent["content"] = topic.xpath(
@@ -237,6 +241,7 @@ class ZhihuSpider(Spider):
     def parse_question_page(self, response):
         huatiContent = response.meta["huatiContent"]
         wenda = WendaAskItem()
+        wenda["tagName"] = self.keyword
         wenda["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         wenda["description"] = response.xpath(
@@ -319,7 +324,7 @@ class ZhihuSpider(Spider):
             return None
 
         article = ArticleItem()
-        article["keyword"] = self.keyword
+        article["tagName"] = self.keyword
         article["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         article["description"] = response.xpath(
@@ -369,8 +374,6 @@ class ZhihuSpider(Spider):
 
                 article["commentList"].append(_item)
 
-        # huatiContent["content"] = article
-        yield article
-        print("huati content----------->")
+        huatiContent["content"] = article
 
-        # yield huatiContent
+        yield huatiContent

@@ -45,11 +45,10 @@ class IcherubySpider(Spider):
     def parse_topic(self, response):
         viewport = response.xpath("//meta[@name='viewport']")
 
-        print("viewport: ", viewport)
-
         huatiItem = HuatiItem()
         huatiItem["tagName"] = response.meta["tagName"]
-        huatiItem["keyword"] = response.meta["tagName"]
+        huatiItem["keyword"] = response.xpath(
+            "//meta[@name='keywords']/@content").extract()[0]
         huatiItem["title"] = response.xpath(
             "//div[@class='tag-title']/text()").extract()[0]
         huatiItem["content"] = response.xpath(
@@ -122,6 +121,7 @@ class IcherubySpider(Spider):
 
         if response.xpath("//div[@class='content-top-One']"):
             article = ArticleItem()
+            article["tagName"] = response.meta["tagName"]
             article["keyword"] = response.xpath(
                 "//meta[@name='keywords']/@content").extract()[0]
             article["description"] = response.xpath(

@@ -109,6 +109,7 @@ class HaodaifuSpider(Spider):
             item["description"] = response.xpath(
                 "//meta[@name='description']/@content").extract()[0]
 
+        item["tagName"] = self.keyword
         item["title"] = extract_with_css("div.article_l h1.fn + p::text")
         item["author"] = extract_with_css('a.article_writer::text')
         item["content"] = content

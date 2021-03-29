@@ -43,6 +43,7 @@ class Fh21Spider(Spider):
     def parse_article(self, response):
 
         item = ArticleItem()
+        item["tagName"] = self.keyword
         item["images"] = []
 
         ptags = response.xpath(

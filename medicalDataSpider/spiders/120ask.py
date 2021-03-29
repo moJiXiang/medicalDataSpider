@@ -46,6 +46,7 @@ class Ask120Spider(Spider):
 
     def parse_ask(self, response):
         wendaAskItem = WendaAskItem()
+        wendaAskItem["tagName"] = self.keyword
         wendaAskItem["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         wendaAskItem["description"] = response.xpath(

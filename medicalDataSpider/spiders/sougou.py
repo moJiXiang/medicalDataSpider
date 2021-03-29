@@ -45,6 +45,7 @@ class SougouSpider(Spider):
 
     def parse_wenda(self, response):
         ask = WendaAskItem()
+        ask["tagName"] = self.keyword
         ask["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         ask["description"] = response.xpath(

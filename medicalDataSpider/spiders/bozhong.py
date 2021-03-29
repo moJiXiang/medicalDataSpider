@@ -57,6 +57,7 @@ class BozhongSpider(Spider):
 
         item = WendaAskItem()
 
+        item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         item["description"] = response.xpath(

@@ -43,24 +43,16 @@ class Tm51Spider(Spider):
         current_page = response.css(
             "div.L-searchpaginbox div.m-style a.active::text").extract()[0]
 
-        print("当前页=========>", current_page)
-
         urls = response.css(
             "div.postMessage ul.postInfo li p:nth-child(1) a::attr(href)").getall()
 
-        print("urls====>", urls)
-
         yield from response.follow_all(urls, self.parse_article)
-
-        # next_page = response.css(
-        # "div.L-searchpaginbox div.m-style a.active + a::attr(href)").get()
 
         next_page = response.css(
             "div.L-searchpaginbox div.m-style a.next:nth-last-child(2)::attr(href)").extract()[0]
 
         next_page = unquote(next_page)
 
-        print("next_page=====>", next_page)
         if next_page:
             yield SplashRequest(response.urljoin(next_page), self.parse, args={'wait': 2})
 
@@ -85,6 +77,7 @@ class Tm51Spider(Spider):
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
 
+        item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         item["description"] = response.xpath(

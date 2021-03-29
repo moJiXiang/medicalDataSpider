@@ -58,11 +58,13 @@ class ChaoneiSpider(Spider):
     def parse_qa(self, response):
         wendaAskItem = WendaAskItem()
 
+        wendaAskItem["tagName"] = self.keyword
+
         if response.xpath("//meta[@name='keywords']"):
             wendaAskItem["keyword"] = response.xpath(
                 "//meta[@name='keywords']/@content").extract()[0]
         else:
-            wendaAskItem["keyword"] = self.keyword
+            wendaAskItem["keyword"] = ""
 
         wendaAskItem["description"] = response.xpath(
             "//meta[@name='description']/@content").extract()[0]
@@ -132,12 +134,15 @@ class ChaoneiSpider(Spider):
     def parse_news(self, response):
         article = ArticleItem()
 
+        article["tagName"] = self.keyword
+
         if response.xpath(
                 "//meta[@name='keywords']"):
             article["keyword"] = response.xpath(
                 "//meta[@name='keywords']/@content").extract()[0]
         else:
-            article["keyword"] = self.keyword
+            article["keyword"] = ""
+
         article["description"] = response.xpath(
             "//meta[@name='description']/@content").extract()[0]
         article["title"] = response.xpath(

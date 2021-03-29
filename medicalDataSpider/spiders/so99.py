@@ -50,6 +50,7 @@ class So99Spider(Spider):
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
 
+        item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         item["description"] = response.xpath(
@@ -75,8 +76,6 @@ class So99Spider(Spider):
 
         urls = response.css("dl.wrap-video dd h3 a::attr(href)").getall()
 
-        print("urls====>", urls)
-
         yield from response.follow_all(urls, self.parse_article)
 
         next_page = response.css(
@@ -101,6 +100,7 @@ class So99Spider(Spider):
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
 
+        item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         item["description"] = response.xpath(
@@ -126,8 +126,6 @@ class So99Spider(Spider):
 
         urls = response.css("div.wd-cont dl dd b a::attr(href)").getall()
 
-        print("urls====>", urls)
-
         yield from response.follow_all(urls, self.parse_wenda_page)
 
         next_page = response.css(
@@ -138,6 +136,7 @@ class So99Spider(Spider):
     def parse_wenda_page(self, response):
         item = WendaAskItem()
 
+        item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         item["description"] = response.xpath(

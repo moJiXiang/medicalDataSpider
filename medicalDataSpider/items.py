@@ -14,6 +14,7 @@ class KeywordItem(scrapy.Item):
 
 
 class ArticleItem(scrapy.Item):
+    tagName = scrapy.Field()
     keyword = scrapy.Field()
     description = scrapy.Field()
     title = scrapy.Field()
@@ -28,6 +29,7 @@ class ArticleItem(scrapy.Item):
 
 
 class WendaAskItem(scrapy.Item):
+    tagName = scrapy.Field()
     keyword = scrapy.Field()
     title = scrapy.Field()
     description = scrapy.Field()
@@ -81,6 +83,7 @@ class HuatiContentItem(scrapy.Item):
 
 
 class BaikeItem(scrapy.Item):
+    tagName = scrapy.Field()
     keyword = scrapy.Field()
     title = scrapy.Field()
     description = scrapy.Field()

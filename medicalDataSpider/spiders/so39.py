@@ -50,6 +50,7 @@ class So39Spider(Spider):
 
     def parse_wenda_page(self, response):
         item = WendaAskItem()
+        item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         item["description"] = response.xpath(
@@ -96,6 +97,7 @@ class So39Spider(Spider):
 
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
+        item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         item["description"] = response.xpath(

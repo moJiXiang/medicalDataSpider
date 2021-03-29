@@ -60,7 +60,6 @@ class BaiduZhidaoSpider(Spider):
         pn = int(response.meta["pn"]) | 1
         spider = BaiduSpider()
         result = spider.search_zhidao(query=self.keyword, pn=pn)
-        pprint(result)
 
         results = result["results"]
         for result in results:
@@ -86,20 +85,21 @@ class BaiduZhidaoSpider(Spider):
     #         yield SplashRequest(item_url, self.parse_zhidao, args={'wait': 1}, meta={'origin_url': item_url})
 
     def parse_zhidao(self, response):
-        print(response.xpath("//html"))
         ask = WendaAskItem()
+        ask["tagName"] = self.keyword
         if response.xpath(
                 "//meta[@name='keywords']"):
             ask["keyword"] = response.xpath(
                 "//meta[@name='keywords']/@content").extract()[0]
         else:
-            ask["keyword"] = self.keyword
+            ask["keyword"] = ""
 
         if response.xpath("//meta[@name='description']"):
             ask["description"] = response.xpath(
                 "//meta[@name='description']/@content").extract()[0]
         else:
             ask["description"] = ""
+
         ask["title"] = response.xpath(
             "//article[@id='qb-content']//span[@class='ask-title']/text()").extract()[0]
         ask["images"] = []

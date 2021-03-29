@@ -59,6 +59,7 @@ class YunivfSpider(Spider):
 
     def parse_article(self, response):
         article = ArticleItem()
+        article["tagName"] = self.keyword
         article["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
         article["description"] = response.xpath(
