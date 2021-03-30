@@ -27,16 +27,17 @@ sh start_spider.sh sougou_spider 试管婴儿
 百度 搜狗不需要运行在 splash privite mode
 
 ### 重爬
-[ ] sougou
-[ ] lamaquan
-[ ] ask120
-[ ] babytree
-[ ] baidu_baike
-[ ] baidu_zhidao
-[ ] bozhong
+[x] sougou
+[x] lamaquan
+[x] ask120
+[x] babytree
+[x] baidu_baike
+[x] baidu_zhidao
+[x] bozhong
 [ ] chaonei
 [ ] fh21
 [ ] haodaifu
 [ ] icheruby
 [ ] jianshu
 [ ] shiguanzhijia
+[x] tm51

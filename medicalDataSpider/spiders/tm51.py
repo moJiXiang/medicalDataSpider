@@ -21,8 +21,8 @@ class Tm51Spider(Spider):
 
     def start_requests(self):
         yield SplashRequest(self.index_url, self.parse_hotkeyword, args={'wait': 1})
-        # for url in self.start_urls:
-        #     yield SplashRequest(url, self.parse, args={'wait': 1})
+        for url in self.start_urls:
+            yield SplashRequest(url, self.parse, args={'wait': 1})
     # 网页响应解析
 
     def parse_hotkeyword(self, response):
@@ -62,7 +62,7 @@ class Tm51Spider(Spider):
             "//div[@class='postDetailsContent']"))
 
         item = ArticleItem()
-        item["imageList"] = []
+        item["images"] = []
 
         text = response.xpath(
             '//div[@class="postDetailsContent"]//text()').extract()
@@ -86,13 +86,33 @@ class Tm51Spider(Spider):
             "div.postTitle::text")
         item["author"] = ""
         item["content"] = content
+        item["topicUrl"] = ""
         item["source"] = response.request.url
+        item["visits"] = response.xpath(
+            "//span[@class='read_icon']/text()").extract()[0]
+        item["likes"] = response.xpath(
+            "//span[@class='L-zann']/text()").extract()[0]
+        item["commentList"] = []
+
+        comments = response.xpath("//ul[contains(@class, 'commentList')]/li")
+
+        if (len(comments) > 0):
+            for comment in comments:
+                _item = {}
+                _item["username"] = comment.xpath(
+                    ".//h6[contains(@class, 'username')]/a/text()").extract()[0].strip()
+                _item["content"] = comment.xpath(
+                    ".//div[contains(@class, 'reply')]/text()").extract()[0].strip()
+                _item["headPortrait"] = comment.xpath(
+                    ".//div[@class='head_img']//img/@src").extract()[0]
+
+                item["commentList"].append(_item)
 
         images = response.xpath(
             '//div[@class="postDetailsContent"]//img')
 
         for img in images:
             img_url = img.xpath('./@src').extract()[0] or ''
-            item["imageList"].append(img_url)
+            item["images"].append(img_url)
 
         yield item

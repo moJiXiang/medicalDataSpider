@@ -508,7 +508,7 @@ class BaiduBaikeSpider(Spider):
         wiki = response.xpath("//body[contains(@class, 'wiki-lemma')]")
         if wiki:
             item = BaikeItem()
-            item["tagName"] = self.keyword
+            item["tagName"] = response.meta["keyword"]
             item["source"] = response.meta["origin_url"]
             if response.xpath("//meta[@name='keywords']"):
                 item["keyword"] = response.xpath(
