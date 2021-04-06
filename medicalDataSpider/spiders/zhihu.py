@@ -106,28 +106,12 @@ class ZhihuSpider(Spider):
         self.start_urls = [
             f'https://www.zhihu.com/search?q={keyword}&type=topic',
         ]
-        self.article_url = [
-            f'https://zhuanlan.zhihu.com/p/357884274',
-            f'https://zhuanlan.zhihu.com/p/27760235',
-            f"https://zhuanlan.zhihu.com/p/29741465"
-        ]
+
         super().__init__(**kwargs)
 
     def start_requests(self):
         for url in self.start_urls:
-            yield SplashRequest(url, self.parse, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600})
-
-        # huatiContent = HuatiContentItem()
-        # huatiContent["keyword"] = self.keyword
-        # huatiContent["title"] = ""
-        # huatiContent["description"] = ""
-        # huatiContent["tagName"] = ""
-        # huatiContent["source"] = ""
-        # huatiContent["likes"] = ""
-        # huatiContent["topicUrl"] = ""
-
-        # for url in self.article_url:
-        #     yield SplashRequest(url, self.parse_article_page, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={"huatiContent": huatiContent, "origin_url": url, "topic_url": ""})
+            yield SplashRequest(url, self.parse, args={'timeout': 3600})
 
     # 话题搜索结果页面
 
@@ -154,6 +138,7 @@ class ZhihuSpider(Spider):
                 urls.append(_a["url"])
 
         for idx, url in enumerate(urls):
+            time.sleep(5 * idx)
             yield SplashRequest(response.urljoin(url + '/hot'), self.parse_topic, endpoint="execute", args={'lua_source': topic_lua_script, 'timeout': 3600}, meta={'origin_url': url})
             yield SplashRequest(response.urljoin(url), self.parse_topic_list, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'origin_url': response.urljoin(url)})
 
@@ -188,8 +173,11 @@ class ZhihuSpider(Spider):
         comments = response.xpath(
             "string(//div[@class='NumberBoard NumberBoard--divider']/a//strong//@title)").extract()[0]
         huati["comments"] = comments
-        huati["parent_huati"] = response.xpath(
-            "//div[@class='TopicRelativeBoard-item'][1]//span[@class='Tag-content']//text()").extract()[0]
+        if response.xpath("//div[@class='TopicRelativeBoard-item'][1]//span[@class='Tag-content']"):
+            huati["parent_huati"] = response.xpath(
+                "//div[@class='TopicRelativeBoard-item'][1]//span[@class='Tag-content']//text()").extract()[0]
+        else:
+            huati["parent_huati"] = []
 
         if response.xpath("// div[@class='TopicRelativeBoard-item'][2]"):
             huati["sub_huati"] = response.xpath(
@@ -204,7 +192,8 @@ class ZhihuSpider(Spider):
 
         topic_list = response.xpath("//div[@class='List-item TopicFeedItem']")
 
-        for topic in topic_list:
+        for idx, topic in enumerate(topic_list):
+            time.sleep(idx * 5)
             url = topic.xpath(
                 ".//h2[@class='ContentItem-title']//a/@href").extract()[0]
 

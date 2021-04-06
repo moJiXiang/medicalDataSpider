@@ -24,20 +24,26 @@ https://stackoverflow.com/questions/51483008/scrapy-splash-not-rendering-dynamic
 
 sh start_spider.sh sougou_spider 试管婴儿
 
-百度 搜狗不需要运行在 splash privite mode
+知乎 不需要 --disable-private-mode
+百度百科需要 --disable-private-mode
 
 ### 重爬
-[x] sougou
-[x] lamaquan
-[x] ask120
-[x] babytree
+[x] sougou_spider
+[x] lamaquan_spider
+[x] ask120_spider
+[x] babytree_spider
 [x] baidu_baike
 [x] baidu_zhidao
-[x] bozhong
-[ ] chaonei
-[ ] fh21
-[ ] haodaifu
-[ ] icheruby
-[ ] jianshu
-[ ] shiguanzhijia
+[x] bozhong_spider
+[x] chaonei
+[x] fh21
+[x] haodaifu
+[x] icheruby
+[x] jianshu
+[x] shiguanzhijia
 [x] tm51
+[x] so39
+[x] so99
+[x] sougou
+[x] yunivf
+[ ] zhihu

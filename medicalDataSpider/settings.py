@@ -91,7 +91,7 @@ ITEM_PIPELINES = {
 # 渲染服务的url
 SPLASH_URL = 'http://127.0.0.1:8050'
 
-
+REFERER_ENABLED = False
 # 去重过滤器
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 

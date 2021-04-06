@@ -56,6 +56,7 @@ class WendaReplayItem(scrapy.Item):
 
 class HuatiItem(scrapy.Item):
     keyword = scrapy.Field()
+    description = scrapy.Field()
     tagName = scrapy.Field()
     title = scrapy.Field()
     images = scrapy.Field()

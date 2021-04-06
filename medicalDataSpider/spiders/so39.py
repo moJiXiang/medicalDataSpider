@@ -52,7 +52,7 @@ class So39Spider(Spider):
         item = WendaAskItem()
         item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
-            "//meta[@name='keywords']/@content").extract()[0]
+            "//meta[@name='Keywords']/@content").extract()[0]
         item["description"] = response.xpath(
             "//meta[@name='description']/@content").extract()[0]
         item["title"] = response.css(
@@ -93,19 +93,28 @@ class So39Spider(Spider):
     def parse_article(self, response):
 
         item = ArticleItem()
-        item["imageList"] = []
+        item["images"] = []
 
         def extract_with_css(query):
             return response.css(query).get(default="").strip()
         item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
-            "//meta[@name='keywords']/@content").extract()[0]
-        item["description"] = response.xpath(
-            "//meta[@name='description']/@content").extract()[0]
+            "//meta[@name='Keywords']/@content").extract()[0]
+
+        if response.xpath("//meta[@name='Description']"):
+            item["description"] = response.xpath(
+                "//meta[@name='Description']/@content").extract()[0]
+        else:
+            item["description"] = response.xpath(
+                "//meta[@name='description']/@content").extract()[0]
         item["title"] = extract_with_css(
             "div.art_box h1::text")
         item["author"] = ""
         item["source"] = response.request.url
+        item["visits"] = 0
+        item["likes"] = 0
+        item["topicUrl"] = ""
+        item["commentList"] = []
 
         ptags = response.xpath(
             './/div[@class="art_con"]/p')
@@ -113,7 +122,6 @@ class So39Spider(Spider):
         # content
         text = []
         for p in ptags:
-            # TODO: check .// and //
             text.append(p.xpath("string()").extract()[0].strip())
 
         content = "<br>".join(text)
@@ -126,7 +134,7 @@ class So39Spider(Spider):
 
         for img in images:
             img_url = img.xpath('./@src').extract()[0] or ''
-            item["imageList"].append(img_url)
+            item["images"].append(img_url)
 
         page_base_url = ""
         page_count = 0
@@ -175,7 +183,7 @@ class So39Spider(Spider):
 
         for img in images:
             img_url = img.xpath('./@src').extract()[0] or ''
-            item["imageList"].append(img_url)
+            item["images"].append(img_url)
 
         if page == page_count:
             yield item

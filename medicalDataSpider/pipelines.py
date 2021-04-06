@@ -46,6 +46,8 @@ class MedicaldataspiderPipeline:
         if isinstance(item, KeywordItem):
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setKeyword"
 
+            print("setKeyword===========>")
+
             requests.post(api, json={
                 "title": item["title"],
                 "keywordList": item["keywordList"],
@@ -138,6 +140,7 @@ class MedicaldataspiderPipeline:
             requests.post(api, json={
                 "tagName": item["tagName"],
                 "keyword": item["keyword"],
+                "description": item["description"],
                 "tagName": item["tagName"],
                 "title": item["title"],
                 "content": item["content"],

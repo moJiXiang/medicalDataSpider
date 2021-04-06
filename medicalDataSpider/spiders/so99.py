@@ -139,8 +139,12 @@ class So99Spider(Spider):
         item["tagName"] = self.keyword
         item["keyword"] = response.xpath(
             "//meta[@name='keywords']/@content").extract()[0]
-        item["description"] = response.xpath(
-            "//meta[@name='description']/@content").extract()[0]
+        if response.xpath("//meta[@name='description']"):
+            item["description"] = response.xpath(
+                "//meta[@name='description']/@content").extract()[0]
+        else:
+            item["description"] = response.xpath(
+                "//meta[@name='Description']/@content").extract()[0]
         item["title"] = response.css("div.dtl-top h1::text").get()
         item["images"] = []
 
@@ -158,6 +162,7 @@ class So99Spider(Spider):
         item["username"] = ""
         item["headPortrait"] = ""
         item["askList"] = []
+        item["topicUrl"] = ""
 
         replyItem = WendaReplayItem()
         replyItem["title"] = item["title"]

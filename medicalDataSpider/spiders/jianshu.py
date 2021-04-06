@@ -84,8 +84,13 @@ class JianshuSpider(Spider):
                 "//meta[@name='keywords']/@content").extract()[0]
         else:
             item["keyword"] = self.keyword
-        item["description"] = response.xpath(
-            "//meta[@name='description']/@content").extract()[0]
+
+        if response.xpath("//meta[@name='description']"):
+            item["description"] = response.xpath(
+                "//meta[@name='description']/@content").extract()[0]
+        else:
+            item["description"] = ""
+
         item["title"] = extract_with_css("section.ouvJEz h1::text")
         item["author"] = extract_with_css('div.rEsl9f a._1OhGeD::text')
         item["content"] = content

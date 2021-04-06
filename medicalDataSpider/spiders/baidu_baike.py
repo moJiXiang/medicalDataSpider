@@ -546,6 +546,6 @@ class BaiduBaikeSpider(Spider):
 
             item["images"] = images
             item["visits"] = response.xpath(
-                "//span[@id='j-lemmaStatistics-pv']//text()").extract()[0]
+                "//span[@id='j-lemmaStatistics-pv']/text()").extract()[0]
 
             yield item

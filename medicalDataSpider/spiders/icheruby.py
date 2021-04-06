@@ -1,10 +1,14 @@
+import scrapy
 from scrapy.spiders import Spider
 from scrapy_splash import SplashRequest
 from medicalDataSpider.items import ArticleItem, HuatiContentItem, HuatiItem, KeywordItem, WendaAskItem, WendaReplayItem
 
 lua_script = '''
 function main(splash, args)
-    assert(splash:go(splash.args.url))
+    splash:set_viewport_size(1980, 1020)
+    assert(splash:go{splash.args.url, headers={
+    ["User-Agent"]= "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
+    }})
     assert(splash:wait(2))
     return splash:html()
 end
@@ -23,7 +27,7 @@ class IcherubySpider(Spider):
         super().__init__(**kwargs)
 
     def start_requests(self):
-        yield SplashRequest(self.index_url, self.parse, args={'wait': 1})
+        yield SplashRequest(self.index_url, self.parse, endpoint="execute", args={'lua_source': lua_script, 'wait': 1})
 
     # 网页响应解析
     def parse(self, response):
@@ -43,78 +47,67 @@ class IcherubySpider(Spider):
         yield keywordItem
 
     def parse_topic(self, response):
-        viewport = response.xpath("//meta[@name='viewport']")
+        print("header: ", response.request.headers["User-Agent"])
+        print("tags: ", response.xpath(
+            "//div[@class='relate-tags-items']"))
+        keywordItem = KeywordItem()
+        keywordItem["title"] = "关键词"
+        keywordItem["keywordList"] = response.xpath(
+            "//div[@class='relate-tags-items']/a/div/text()").extract()
+        keywordItem["source"] = f'https://www.icheruby.com'
+        print("keywordItem: ", keywordItem)
+        yield keywordItem
 
-        huatiItem = HuatiItem()
-        huatiItem["tagName"] = response.meta["tagName"]
-        huatiItem["keyword"] = response.xpath(
-            "//meta[@name='keywords']/@content").extract()[0]
-        huatiItem["title"] = response.xpath(
-            "//div[@class='tag-title']/text()").extract()[0]
-        huatiItem["content"] = response.xpath(
-            "//div[@class='tag-description-container']/p/text()").extract()[0]
-        huatiItem["images"] = response.xpath(
-            "//div[@class='tag-image']/img/@src").extract()
-        huatiItem["source"] = response.meta["origin_url"]
-        huatiItem["comments"] = 0
+        # huatiItem = HuatiItem()
+        # huatiItem["tagName"] = response.meta["tagName"]
+        # huatiItem["keyword"] = response.xpath(
+        #     "//meta[@name='keywords']/@content").extract()[0]
+        # huatiItem["description"] = response.xpath(
+        #     "//meta[@name='description']/@content").extract()[0].strip()
+        # huatiItem["title"] = response.xpath(
+        #     "//div[@class='tag-title']/text()").extract()[0]
+        # huatiItem["content"] = response.xpath(
+        #     "//div[@class='tag-description-container']/p/text()").extract()[0]
+        # huatiItem["images"] = response.xpath(
+        #     "//div[@class='tag-image']/img/@src").extract()
+        # huatiItem["source"] = response.meta["origin_url"]
+        # huatiItem["comments"] = 0
 
-        huatiItem["visits"] = response.xpath(
-            "//div[@class='tag-view-count']/span/text()").extract()[0]
-        huatiItem["topicUrl"] = response.meta["origin_url"]
-        huatiItem["parent_huati"] = ""
-        huatiItem["sub_huati"] = []
+        # huatiItem["visits"] = response.xpath(
+        #     "//div[@class='tag-view']/text()").extract()[0].split("被浏览 ")[1]
+        # huatiItem["topicUrl"] = response.meta["origin_url"]
+        # huatiItem["parent_huati"] = ""
+        # huatiItem["sub_huati"] = []
 
-        yield huatiItem
+        # yield huatiItem
 
-        huati_list = response.xpath(
-            "//div[@class='tag-items']/div[@class='tag-item']")
-
-        for huati in huati_list:
-            huatiContent = HuatiContentItem()
-            huatiContent["keyword"] = response.meta["tagName"]
-            huatiContent["tagName"] = response.meta["tagName"]
-            huatiContent["title"] = huati.xpath(
-                ".//div[@class='tag-item-title']/text()").extract()[0].strip()
-            huatiContent["content"] = huati.xpath(
-                ".//div[@class='tag-item-desc']/text()").extract()[0].strip()
-            huatiContent["source"] = response.meta["origin_url"]
-            huatiContent["topicUrl"] = response.meta["origin_url"]
-            huatiContent["visits"] = 0
-            huatiContent["likes"] = 0
-
-            url = huati.xpath(".//a/@href").extract()[0]
-
-            if url.find("news") >= 0:
-                yield SplashRequest(response.urljoin(url), self.parse_news, endpoint="execute", args={'tagName': response.meta["tagName"], 'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": response.urljoin(url), "tagName": response.meta["tagName"],  "topic_url": response.request.url, "huatiContent": huatiContent})
-
-        next_page = response.xpath(
-            "div[@class='page-container']/button[@class='page-button']/a")
-
-        if next_page:
-            next_page_url = next_page.xpath("./@href").extract()[0]
-            yield SplashRequest(next_page_url, self.parse_topic, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": next_page_url, "tagName": response.meta["tagName"]})
-
-        # huati_list = response.xpath("//div[@class='content-container']/a")
+        # huati_list = response.xpath(
+        #     "//div[@class='tag-items']/div[@class='tag-item']")
 
         # for huati in huati_list:
         #     huatiContent = HuatiContentItem()
         #     huatiContent["keyword"] = response.meta["tagName"]
         #     huatiContent["tagName"] = response.meta["tagName"]
         #     huatiContent["title"] = huati.xpath(
-        #         ".//div[@class='item-title']/text()").extract()[0]
+        #         ".//div[@class='tag-item-title']/text()").extract()[0].strip()
         #     huatiContent["content"] = huati.xpath(
-        #         ".//div[@class='item-desc']/text()").extract()[0].strip()
+        #         ".//div[@class='tag-item-desc']/text()").extract()[0].strip()
         #     huatiContent["source"] = response.meta["origin_url"]
-        #     huatiContent["topicUrl"] = response.meta["topicUrl"]
-        #     huatiContent["visits"] = response.xpath(
-        #         ".//div[@class='count-number']/text()").extract()[0]
+        #     huatiContent["topicUrl"] = response.meta["origin_url"]
+        #     huatiContent["visits"] = 0
+        #     huatiContent["likes"] = 0
 
-        #     url = huati.xpath("./@href").extract()
+        #     url = huati.xpath(".//a/@href").extract()[0]
 
         #     if url.find("news") >= 0:
-        #         yield SplashRequest(response.urljoin(url), self.parse_news, endpoint="execute", args={'tagName': response.meta["tagName"], 'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": response.urljoin(url), "topic_url": response.request.url, "huatiContent": huatiContent})
-            # elif url.find("ask") >= 0:
-            #     yield SplashRequest(response.urljoin(url), self.parse_ask, endpoint="execute", args={'tagName': response.meta["tagName"], 'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": response.urljoin(url), "topic_url": response.request.url,  "huatiContent": huatiContent})
+        #         yield SplashRequest(response.urljoin(url), self.parse_news, endpoint="execute", args={'tagName': response.meta["tagName"], 'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": response.urljoin(url), "tagName": response.meta["tagName"],  "topic_url": response.request.url, "huatiContent": huatiContent})
+
+        # next_page = response.xpath(
+        #     "div[@class='page-container']/button[@class='page-button']/a")
+
+        # if next_page:
+        #     next_page_url = next_page.xpath("./@href").extract()[0]
+        #     yield SplashRequest(next_page_url, self.parse_topic, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={"origin_url": next_page_url, "tagName": response.meta["tagName"]})
 
     def parse_news(self, response):
         huatiContent = response.meta["huatiContent"]
