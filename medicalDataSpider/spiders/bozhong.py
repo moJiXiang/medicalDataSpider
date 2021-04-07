@@ -71,7 +71,7 @@ class BozhongSpider(Spider):
 
         if content_table:
             item["content"] = response.xpath(
-                "//div[@class='theme_box post_list']//div[@class='topic_main list_box']//div[@class='fsz_main']/table//td/text()").extract()[0].strip()
+                "//div[@class='theme_box post_list']//div[@class='topic_main list_box']//div[@class='fsz_main']//table//td/text()").extract()[0].strip()
         else:
             item["content"] = ""
 
@@ -81,7 +81,7 @@ class BozhongSpider(Spider):
             item["addtime"] = addtime_span_tag.xpath("./@title").extract()[0]
         else:
             item["addtime"] = response.xpath(
-                "//div[@class='theme_box post_list']//div[@class='auth_info_main']/em").extract()[0].strip().split("发表于 ")[1]
+                "//div[@class='auth_info_main']/em").extract()[0].strip().split("发表于 ")[1]
         item["source"] = response.meta["origin_url"]
         item["username"] = response.xpath(
             "//div[@class='theme_box post_list']//div[@class='auth_info_bar']//a/text()").extract()[0]

@@ -92,8 +92,12 @@ class Ask120Spider(Spider):
                 else:
                     wendaReply["content"] = ""
 
-                wendaReply["addtime"] = reply.xpath(
-                    ".//div[contains(@class, 'b_answercont')]//span[@class='b_anscont_time']/text()").extract()[0].strip()
+                if reply.xpath(".//div[contains(@class, 'b_answercont')]//span[@class='b_anscont_time']"):
+                    wendaReply["addtime"] = reply.xpath(
+                        ".//div[contains(@class, 'b_answercont')]//span[@class='b_anscont_time']/text()").extract()[0].strip()
+                else:
+                    wendaReply["addtime"] = ""
+
                 wendaReply["source"] = wendaAskItem["source"]
                 if reply.xpath(
                         "./div[contains(@class, 'b_answertop')]/a[@class='b_docface']"):

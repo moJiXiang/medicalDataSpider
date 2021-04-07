@@ -47,3 +47,29 @@ sh start_spider.sh sougou_spider 试管婴儿
 [x] sougou
 [x] yunivf
 [ ] zhihu
+
+
+带搜索的
+ask120
+babytree
+bozhong
+fh21
+haodaifu
+jianshu
+shiguanzhijia
+so39
+so99
+sougou
+tm51
+yunivf
+zhihu
+
+
+baidu_baike
+baidu_zhidao
+
+没有搜索的
+
+chaonei
+icheruby
+lamaquan
