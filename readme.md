@@ -27,6 +27,8 @@ sh start_spider.sh sougou_spider 试管婴儿
 知乎 不需要 --disable-private-mode
 百度百科需要 --disable-private-mode
 
+运行runner_spider.py： python3 runner_spider.py
+
 ### 重爬
 [x] sougou_spider
 [x] lamaquan_spider
