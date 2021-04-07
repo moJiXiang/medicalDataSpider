@@ -75,3 +75,9 @@ baidu_zhidao
 chaonei
 icheruby
 lamaquan
+
+
+### 部署
+1. 在 --disable-private-mode 模式下运行 python3 runner_baidu_spider.py 
+2. 带搜索的爬虫 python3 runner_spider_with_search.py
+3. 不带搜索的爬虫 python3 runner_spider_without_search.py
