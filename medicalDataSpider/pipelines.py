@@ -52,11 +52,11 @@ class MedicaldataspiderPipeline:
                 "source": item["source"]
             })
 
-            self.db[self.keyword_collection].insert_one(
-                ItemAdapter(item).asdict())
+            # self.db[self.keyword_collection].insert_one(
+            #     ItemAdapter(item).asdict())
         elif isinstance(item, BaikeItem):
-            self.db[self.baike_collection].insert_one(
-                ItemAdapter(item).asdict())
+            # self.db[self.baike_collection].insert_one(
+            #     ItemAdapter(item).asdict())
 
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setBaike"
 
@@ -73,8 +73,8 @@ class MedicaldataspiderPipeline:
             })
 
         elif isinstance(item, ArticleItem):
-            self.db[self.article_collection].insert_one(
-                ItemAdapter(item).asdict())
+            # self.db[self.article_collection].insert_one(
+            #     ItemAdapter(item).asdict())
 
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setNews"
 
@@ -93,8 +93,8 @@ class MedicaldataspiderPipeline:
             })
 
         elif isinstance(item, CommentItem):
-            self.db[self.comment_collection].insert_one(
-                ItemAdapter(item).asdict())
+            # self.db[self.comment_collection].insert_one(
+            #     ItemAdapter(item).asdict())
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setComment"
 
             requests.post(api, json={
@@ -104,8 +104,8 @@ class MedicaldataspiderPipeline:
             })
 
         elif isinstance(item, WendaAskItem):
-            self.db[self.wenda_collection].insert_one(
-                ItemAdapter(item).asdict())
+            # self.db[self.wenda_collection].insert_one(
+            #     ItemAdapter(item).asdict())
 
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setAsk"
 
@@ -130,8 +130,8 @@ class MedicaldataspiderPipeline:
             })
 
         elif isinstance(item, HuatiItem):
-            self.db[self.huati_collection].insert_one(
-                ItemAdapter(item).asdict())
+            # self.db[self.huati_collection].insert_one(
+            #     ItemAdapter(item).asdict())
 
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setHuati"
 
@@ -151,8 +151,8 @@ class MedicaldataspiderPipeline:
             })
 
         elif isinstance(item, HuatiContentItem):
-            self.db[self.huaticontent_collection].insert_one(
-                ItemAdapter(item).asdict())
+            # self.db[self.huaticontent_collection].insert_one(
+            #     ItemAdapter(item).asdict())
             api = "http://spider-es-api-test1.xiaoxinfen.com/api/spider/setHuatiContent"
 
             ask = {}
