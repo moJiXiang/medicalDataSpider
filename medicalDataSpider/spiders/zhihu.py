@@ -10,7 +10,7 @@ from medicalDataSpider.items import ArticleItem, CommentItem, HuatiContentItem, 
 lua_script = '''
 function main(splash, args)
     splash.images_enabled = false
-    local num_scrolls = 10  -- 翻页数
+    local num_scrolls = 5  -- 翻页数
     local scroll_delay = 1  -- 翻页等待时间
     local scroll_to = splash:jsfunc("window.scrollTo")
     local get_body_height = splash:jsfunc(
@@ -35,7 +35,7 @@ end
 question_lua_script = '''
 function main(splash, args)
     splash.images_enabled = false
-    local num_scrolls = 10  -- 翻页数
+    local num_scrolls = 5  -- 翻页数
     local scroll_delay = 1  -- 翻页等待时间
     local scroll_to = splash:jsfunc("window.scrollTo")
     local get_body_height = splash:jsfunc(
@@ -81,6 +81,7 @@ end
 
 article_lua_script = '''
 function main(splash, args)
+    splash.images_enabled = false
     splash:go(splash.args.url)
     splash:wait(2)
     btn = splash:select('.Modal-closeButton')
@@ -98,7 +99,7 @@ class ZhihuSpider(Spider):
     keyword = ""
 
     custom_settings = {
-        DOWNLOAD_DELAY: 15
+        "DOWNLOAD_DELAY": 10
     }
 
     def __init__(self, keyword="", **kwargs):
@@ -111,7 +112,7 @@ class ZhihuSpider(Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield SplashRequest(url, self.parse, args={'timeout': 3600})
+            yield SplashRequest(url, self.parse, endpoint="execute", args={'lua_source': topic_lua_script, 'timeout': 3600})
 
     # 话题搜索结果页面
 
@@ -134,11 +135,10 @@ class ZhihuSpider(Spider):
 
         for _a in arr:
             # 只爬取含有关键词的话题
-            if _a["title"].find(self.keyword) >= 0:
-                urls.append(_a["url"])
+            urls.append(_a["url"])
 
         for idx, url in enumerate(urls):
-            time.sleep(5 * idx)
+            # time.sleep(5 * idx)
             yield SplashRequest(response.urljoin(url + '/hot'), self.parse_topic, endpoint="execute", args={'lua_source': topic_lua_script, 'timeout': 3600}, meta={'origin_url': url})
             yield SplashRequest(response.urljoin(url), self.parse_topic_list, endpoint="execute", args={'lua_source': lua_script, 'timeout': 3600}, meta={'origin_url': response.urljoin(url)})
 
@@ -193,7 +193,7 @@ class ZhihuSpider(Spider):
         topic_list = response.xpath("//div[@class='List-item TopicFeedItem']")
 
         for idx, topic in enumerate(topic_list):
-            time.sleep(idx * 5)
+            # time.sleep(idx * 5)
             url = topic.xpath(
                 ".//h2[@class='ContentItem-title']//a/@href").extract()[0]
 

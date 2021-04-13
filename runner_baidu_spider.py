@@ -18,7 +18,7 @@ process = CrawlerRunner(get_project_settings())
 @defer.inlineCallbacks
 def crawl():
     for keyword in keywords:
-        yield process.crawl(BaiduBaikeSpider, keyword)
+        # yield process.crawl(BaiduBaikeSpider, keyword)
         yield process.crawl(BaiduZhidaoSpider, keyword)
 
     reactor.stop()
