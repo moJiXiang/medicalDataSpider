@@ -78,6 +78,5 @@ lamaquan
 
 
 ### 部署
-1. 在 --disable-private-mode 模式下运行 python3 runner_baidu_spider.py 
-2. 带搜索的爬虫 python3 runner_spider_with_search.py
-3. 不带搜索的爬虫 python3 runner_spider_without_search.py
+1. 在 --disable-private-mode 模式下运行 sh run_baidu_task.sh
+2. 其他两台机子 sh run_task1.sh  sh run_task2.sh
