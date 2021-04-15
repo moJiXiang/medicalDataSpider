@@ -99,7 +99,7 @@ class ZhihuSpider(Spider):
     keyword = ""
 
     custom_settings = {
-        "DOWNLOAD_DELAY": 10
+        "DOWNLOAD_DELAY": 5
     }
 
     def __init__(self, keyword="", **kwargs):

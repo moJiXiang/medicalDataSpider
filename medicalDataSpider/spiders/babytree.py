@@ -30,18 +30,19 @@ class BabytreeSpider(Spider):
 
     # 网页响应解析
     def parse(self, response):
-        current_page_number = int(response.xpath(
-            "//div[@class='pagejump']/span[@class='current']/text()").extract()[0])
-        total_page_text = response.xpath(
-            "//div[@class='pagejump']/span[@class='page-number']/text()").extract()[0]
-        result = re.search(r"\d+\.?\d*", total_page_text)
-        total_page = int(result.group())
+        if (response.xpath("//div[@class='pagejump']")):
+            current_page_number = int(response.xpath(
+                "//div[@class='pagejump']/span[@class='current']/text()").extract()[0])
+            total_page_text = response.xpath(
+                "//div[@class='pagejump']/span[@class='page-number']/text()").extract()[0]
+            result = re.search(r"\d+\.?\d*", total_page_text)
+            total_page = int(result.group())
 
-        if (current_page_number < total_page):
+            if (current_page_number < total_page):
 
-            next_page_url = response.xpath(
-                "//div[@class='pagejump']/a[position()=last()-1]/@href").extract()[0]
-            yield SplashRequest(response.urljoin(next_page_url), self.parse)
+                next_page_url = response.xpath(
+                    "//div[@class='pagejump']/a[position()=last()-1]/@href").extract()[0]
+                yield SplashRequest(response.urljoin(next_page_url), self.parse)
 
         search_list = response.xpath(
             "//div[@class='search_item_area']/div[@class='search_item']")

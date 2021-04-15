@@ -112,7 +112,7 @@ class Ask120Spider(Spider):
                 if info:
 
                     result = re.search(r"\d+\.?\d*", info)
-                    if result.group():
+                    if result and result.group():
                         wendaReply["likes"] = result.group()
                     else:
                         wendaReply["likes"] = 0
