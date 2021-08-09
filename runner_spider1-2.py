@@ -18,10 +18,26 @@ from medicalDataSpider.spiders.ask120 import Ask120Spider
 from scrapy.utils.log import configure_logging
 from keywords import keywords
 from short_keywords import short_keywords
+import requests
 
 # configure_logging()
 process = CrawlerRunner(get_project_settings())
 
+api = "https://spider-es-jx-api.jxivf.com/ex/spider/getNeedCrawlerKeyword"
+
+r = requests.post(api, json={
+    "id": 1,
+    "pageNum":1,
+    "pageSize": 100000
+})
+
+re = r.json()
+
+kws = re.get('data')
+
+for kw in kws:
+    print(kw.get("title"))
+    keywords.append(kw.get("title"))
 
 @defer.inlineCallbacks
 def crawl():

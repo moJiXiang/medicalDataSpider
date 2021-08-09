@@ -13,10 +13,24 @@ from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
 from keywords import keywords
+import requests
 
 # configure_logging()
 process = CrawlerRunner(get_project_settings())
 
+r = requests.post(api, json={
+    "id": 1,
+    "pageNum":1,
+    "pageSize": 100000
+})
+
+re = r.json()
+
+kws = re.get('data')
+
+for kw in kws:
+    print(kw.get("title"))
+    keywords.append(kw.get("title"))
 
 @defer.inlineCallbacks
 def crawl():
